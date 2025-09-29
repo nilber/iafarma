@@ -1,0 +1,180 @@
+/* Performance Fix CSS - Reduz "piscadas" e suaviza transições */
+
+/* Base - Suaviza todas as mudanças de estado */
+* {
+  transition: opacity 0.15s ease-in-out, 
+              background-color 0.15s ease-in-out,
+              border-color 0.15s ease-in-out,
+              color 0.15s ease-in-out,
+              transform 0.15s ease-in-out !important;
+}
+
+/* Exceção: Remove transição de transform dos elementos Radix para evitar conflito */
+[data-radix-popper-content-wrapper],
+[data-radix-popper-content-wrapper] *,
+[data-radix-dropdown-menu-content],
+[data-radix-dropdown-menu-content] *,
+[data-radix-select-content],
+[data-radix-select-content] *,
+[data-radix-menubar-content],
+[data-radix-menubar-content] * {
+  transition: opacity 0.15s ease-in-out, 
+              background-color 0.15s ease-in-out,
+              border-color 0.15s ease-in-out,
+              color 0.15s ease-in-out !important;
+}
+
+/* Remove transições em elementos que mudam frequentemente para evitar flicker */
+[data-state], 
+.loading, 
+.animate-pulse,
+.animate-spin {
+  transition: none !important;
+}
+
+
+
+/* Suaviza mudanças em badges e status */
+.badge, 
+[class*="badge"],
+.status,
+[class*="status"] {
+  transition: all 0.2s ease-in-out !important;
+}
+
+/* Reduz animações de pulse para ser menos agressivo */
+.animate-pulse {
+  animation-duration: 3s !important;
+  animation-timing-function: ease-in-out !important;
+}
+
+/* Suaviza mudanças em tabelas e listas */
+table tr,
+li,
+.list-item {
+  transition: background-color 0.2s ease-in-out !important;
+}
+
+/* Suaviza aparição/desaparição de elementos */
+.space-y-4 > *, 
+.space-y-6 > *,
+.grid > *,
+.flex > * {
+  transition: opacity 0.25s ease-in-out, 
+              transform 0.25s ease-in-out !important;
+}
+
+/* Previne layout shift em elementos loading */
+.skeleton,
+.loading-placeholder {
+  min-height: 1rem;
+  transition: opacity 0.3s ease-in-out !important;
+}
+
+/* Suaviza mudanças em cards */
+.card,
+[class*="card"] {
+  transition: box-shadow 0.2s ease-in-out,
+              border-color 0.2s ease-in-out,
+              background-color 0.2s ease-in-out !important;
+}
+
+/* Reduz flicker em elementos hover */
+button:hover,
+[role="button"]:hover,
+.clickable:hover {
+  transition: all 0.15s ease-in-out !important;
+}
+
+/* Suaviza mudanças em inputs e selects */
+input,
+select,
+textarea {
+  transition: border-color 0.2s ease-in-out,
+              box-shadow 0.2s ease-in-out !important;
+}
+
+/* Previne flicker em elementos com scroll */
+.overflow-auto,
+.overflow-scroll {
+  scrollbar-gutter: stable;
+}
+
+/* Reduz jank em elementos position fixed/sticky */
+.fixed,
+.sticky {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Otimiza rendering de listas longas */
+.list-container {
+  contain: layout style paint;
+}
+
+/* Reduz repaints em elementos que mudam cor */
+.text-muted-foreground,
+.text-foreground,
+[class*="text-"] {
+  transition: color 0.2s ease-in-out !important;
+}
+
+/* Smooth scroll para evitar jank */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Otimiza elementos que fazem toggle frequentemente */
+[aria-expanded],
+[data-state="open"],
+[data-state="closed"] {
+  transition: opacity 0.2s ease-in-out,
+              transform 0.2s ease-in-out !important;
+}
+
+/* Reduz CPU usage em animações CSS */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Performance hint para browser */
+.performance-critical {
+  will-change: auto;
+  contain: layout;
+}
+
+/* Anti-flicker para elementos que aparecem/desaparecem */
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.fade-out {
+  animation: fadeOut 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* Otimização específica para componentes React */
+.react-component {
+  isolation: isolate;
+  contain: layout style;
+}
+
+
+
+/* Reduz reflow em elementos flex */
+.flex-container {
+  contain: layout;
+}

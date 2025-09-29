@@ -1,0 +1,259 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Sistema de Design IAFarma - Multi-tenant Sales & WhatsApp System */
+
+@layer base {
+  :root {
+    /* Core Business Colors */
+    --background: 0 0% 100%;
+    --foreground: 213 27% 14%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 213 27% 14%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 213 27% 14%;
+
+    /* Primary - Corporate Blue */
+    --primary: 217 81% 37%;
+    --primary-foreground: 0 0% 98%;
+    --primary-light: 217 81% 45%;
+    --primary-dark: 217 81% 29%;
+
+    /* Secondary - Elegant Gray */
+    --secondary: 218 18% 96%;
+    --secondary-foreground: 213 27% 14%;
+
+    --muted: 218 18% 96%;
+    --muted-foreground: 213 11% 52%;
+
+    --accent: 218 40% 94%;
+    --accent-foreground: 213 27% 14%;
+
+    /* WhatsApp Module Colors */
+    --whatsapp: 142 70% 49%;
+    --whatsapp-foreground: 0 0% 98%;
+    --whatsapp-light: 142 70% 55%;
+    --whatsapp-dark: 142 70% 43%;
+
+    /* Sales Module Colors */
+    --sales: 262 83% 58%;
+    --sales-foreground: 0 0% 98%;
+    --sales-light: 262 83% 65%;
+
+    /* Status Colors */
+    --success: 142 70% 49%;
+    --success-foreground: 0 0% 98%;
+    
+    --warning: 25 95% 53%;
+    --warning-foreground: 0 0% 98%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    /* UI Elements */
+    --border: 218 18% 89%;
+    --input: 218 18% 89%;
+    --ring: 217 81% 37%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-light)));
+    --gradient-whatsapp: linear-gradient(135deg, hsl(var(--whatsapp)), hsl(var(--whatsapp-light)));
+    --gradient-sales: linear-gradient(135deg, hsl(var(--sales)), hsl(var(--sales-light)));
+    --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted)));
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(var(--primary) / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(var(--primary) / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(var(--primary) / 0.1);
+    --shadow-elegant: 0 20px 25px -5px hsl(var(--primary) / 0.15);
+
+    /* Spacing & Layout */
+    --radius: 0.75rem;
+
+    /* Sidebar */
+    --sidebar-background: 218 18% 96%;
+    --sidebar-foreground: 213 27% 14%;
+    --sidebar-primary: 217 81% 37%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 218 40% 94%;
+    --sidebar-accent-foreground: 213 27% 14%;
+    --sidebar-border: 218 18% 89%;
+    --sidebar-ring: 217 81% 37%;
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .dark {
+    /* Core Business Colors - Dark Mode */
+    --background: 213 27% 8%;
+    --foreground: 218 18% 96%;
+
+    --card: 213 27% 10%;
+    --card-foreground: 218 18% 96%;
+
+    --popover: 213 27% 10%;
+    --popover-foreground: 218 18% 96%;
+
+    /* Primary remains the same for contrast */
+    --primary: 217 81% 45%;
+    --primary-foreground: 0 0% 98%;
+    --primary-light: 217 81% 55%;
+    --primary-dark: 217 81% 35%;
+
+    /* Secondary - Dark Mode */
+    --secondary: 213 27% 18%;
+    --secondary-foreground: 218 18% 96%;
+
+    --muted: 213 27% 18%;
+    --muted-foreground: 218 11% 65%;
+
+    --accent: 213 27% 20%;
+    --accent-foreground: 218 18% 96%;
+
+    /* WhatsApp - Slightly adjusted for dark mode */
+    --whatsapp: 142 70% 45%;
+    --whatsapp-foreground: 0 0% 98%;
+    --whatsapp-light: 142 70% 55%;
+    --whatsapp-dark: 142 70% 35%;
+
+    /* Sales - Adjusted for dark mode */  
+    --sales: 262 83% 65%;
+    --sales-foreground: 0 0% 98%;
+    --sales-light: 262 83% 75%;
+
+    /* Status Colors - Dark Mode */
+    --success: 142 70% 45%;
+    --success-foreground: 0 0% 98%;
+    
+    --warning: 38 92% 55%;
+    --warning-foreground: 0 0% 98%;
+    
+    --destructive: 0 84% 65%;
+    --destructive-foreground: 0 0% 98%;
+
+    /* UI Elements - Dark Mode */
+    --border: 213 27% 22%;
+    --input: 213 27% 22%;
+    --ring: 217 81% 45%;
+
+    /* Sidebar - Dark Mode */
+    --sidebar-background: 213 27% 10%;
+    --sidebar-foreground: 218 18% 90%;
+    --sidebar-primary: 217 81% 45%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 213 27% 18%;
+    --sidebar-accent-foreground: 218 18% 90%;
+    --sidebar-border: 213 27% 22%;
+    --sidebar-ring: 217 81% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    /* Force consistent background color */
+    background-color: hsl(var(--background)) !important;
+  }
+
+  /* Comprehensive fix for browser autocomplete yellow background */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active,
+  textarea:-webkit-autofill,
+  textarea:-webkit-autofill:hover,
+  textarea:-webkit-autofill:focus,
+  textarea:-webkit-autofill:active,
+  select:-webkit-autofill,
+  select:-webkit-autofill:hover,
+  select:-webkit-autofill:focus,
+  select:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px hsl(var(--background)) inset !important;
+    -webkit-text-fill-color: hsl(var(--foreground)) !important;
+    box-shadow: 0 0 0 1000px hsl(var(--background)) inset !important;
+    background-color: hsl(var(--background)) !important;
+    background-image: none !important;
+    color: hsl(var(--foreground)) !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  /* Additional fix for autofill in dark mode */
+  .dark input:-webkit-autofill,
+  .dark input:-webkit-autofill:hover,
+  .dark input:-webkit-autofill:focus,
+  .dark input:-webkit-autofill:active,
+  .dark textarea:-webkit-autofill,
+  .dark textarea:-webkit-autofill:hover,
+  .dark textarea:-webkit-autofill:focus,
+  .dark textarea:-webkit-autofill:active,
+  .dark select:-webkit-autofill,
+  .dark select:-webkit-autofill:hover,
+  .dark select:-webkit-autofill:focus,
+  .dark select:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px hsl(var(--background)) inset !important;
+    -webkit-text-fill-color: hsl(var(--foreground)) !important;
+    box-shadow: 0 0 0 1000px hsl(var(--background)) inset !important;
+    background-color: hsl(var(--background)) !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  /* Alternative method for Firefox and other browsers */
+  input[type="email"],
+  input[type="password"],
+  input[type="text"],
+  input[type="search"],
+  /* input[type="tel"], */
+  input[type="url"] {
+    background-color: hsl(var(--background)) !important;
+    background-image: none !important;
+  }
+
+  /* Global background override to prevent any yellow tinting */
+  *,
+  *::before,
+  *::after {
+    background-color: transparent;
+  }
+
+  /* Ensure root elements have correct background */
+  html,
+  body,
+  #root {
+    background-color: hsl(var(--background)) !important;
+  }
+}
+
+/* Leaflet Map Styles */
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+}
+
+.leaflet-control-zoom {
+  border: none !important;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1) !important;
+}
+
+.leaflet-control-zoom a {
+  border: none !important;
+  background-color: white !important;
+  color: #374151 !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background-color: #f3f4f6 !important;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 8px !important;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
+}

@@ -1,0 +1,55 @@
+# Ignore source code (already compiled by GitHub Actions)
+*.go
+cmd/
+internal/
+pkg/
+
+# Ignore migrations (using GORM AutoMigrate only)
+migrations/
+
+# Ignore build artifacts (except the final binary)
+main
+api
+bin/
+tmp/
+*.log
+nohup.out
+
+# Ignore development files
+.env
+.env.local
+.env.development
+.env.test
+.env.example
+
+# Ignore Git
+.git/
+.gitignore
+
+# Ignore documentation and examples
+*.md
+docs/
+k8s-deployment.yaml
+
+# Ignore test files
+*_test.go
+test_*
+
+# Ignore IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore temporary files
+*.tmp
+*.temp
+temp/
+
+# Ignore Go modules (not needed in runtime)
+go.mod
+go.sum

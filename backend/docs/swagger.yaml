@@ -1,0 +1,6247 @@
+basePath: /api/v1
+definitions:
+  ai.ProductGenerationResponse:
+    properties:
+      description:
+        type: string
+      suggestions:
+        properties:
+          brand:
+            type: string
+          category:
+            type: string
+          keywords:
+            items:
+              type: string
+            type: array
+        type: object
+      tags:
+        items:
+          type: string
+        type: array
+    type: object
+  auth.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  auth.LoginResponse:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        type: integer
+      refresh_token:
+        type: string
+      user:
+        $ref: '#/definitions/models.User'
+    type: object
+  handlers.AICreditResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      last_updated_by:
+        type: string
+      remaining_credits:
+        type: integer
+      tenant_id:
+        type: string
+      total_credits:
+        type: integer
+      updated_at:
+        type: string
+      used_credits:
+        type: integer
+    type: object
+  handlers.AddCreditsRequest:
+    properties:
+      amount:
+        minimum: 1
+        type: integer
+      description:
+        type: string
+      tenant_id:
+        type: string
+    required:
+    - amount
+    - description
+    - tenant_id
+    type: object
+  handlers.CidadeResponse:
+    properties:
+      ddd:
+        type: integer
+      id:
+        type: integer
+      latitude:
+        type: number
+      longitude:
+        type: number
+      nome_cidade:
+        type: string
+      uf:
+        type: string
+    type: object
+  handlers.ComparisonMetadata:
+    properties:
+      comparison_period:
+        type: string
+      data_points:
+        type: integer
+      has_sufficient_data:
+        type: boolean
+      message:
+        type: string
+    type: object
+  handlers.ConversationCounts:
+    properties:
+      arquivadas:
+        description: Archived conversations with unread messages
+        type: integer
+      em_atendimento:
+        description: Conversations with assigned agent with unread messages
+        type: integer
+      minhas:
+        description: Conversations assigned to current user with unread messages
+        type: integer
+      novas:
+        description: Conversations without assigned agent with unread messages
+        type: integer
+    type: object
+  handlers.CreateNoteRequest:
+    properties:
+      content:
+        type: string
+      conversation_id:
+        type: string
+    required:
+    - content
+    - conversation_id
+    type: object
+  handlers.CreateTemplateRequest:
+    properties:
+      category:
+        type: string
+      content:
+        type: string
+      description:
+        type: string
+      title:
+        type: string
+      variables:
+        items:
+          type: string
+        type: array
+    required:
+    - content
+    - title
+    type: object
+  handlers.DashboardStats:
+    properties:
+      active_channels:
+        type: integer
+      active_customers:
+        type: integer
+      connected_channels:
+        type: integer
+      pending_orders:
+        type: integer
+      products_on_sale:
+        type: integer
+      total_channels:
+        type: integer
+      total_customers:
+        type: integer
+      total_orders:
+        type: integer
+      total_products:
+        type: integer
+    type: object
+  handlers.EstadoResponse:
+    properties:
+      nome:
+        type: string
+      uf:
+        type: string
+    type: object
+  handlers.GenerateProductInfoRequest:
+    properties:
+      product_name:
+        type: string
+    required:
+    - product_name
+    type: object
+  handlers.MigrationResponse:
+    properties:
+      message:
+        type: string
+      migrated_count:
+        type: integer
+    type: object
+  handlers.OrderStatsResponse:
+    properties:
+      comparison:
+        $ref: '#/definitions/handlers.ComparisonMetadata'
+      delivered_today:
+        type: integer
+      growth_rates:
+        additionalProperties:
+          format: float64
+          type: number
+        type: object
+      pending_orders:
+        type: integer
+      recent_orders:
+        items:
+          $ref: '#/definitions/handlers.OrderSummary'
+        type: array
+      revenue:
+        type: number
+      status_breakdown:
+        additionalProperties:
+          type: integer
+        type: object
+      total_orders:
+        type: integer
+    type: object
+  handlers.OrderSummary:
+    properties:
+      created_at:
+        type: string
+      customer_name:
+        type: string
+      id:
+        type: string
+      items_count:
+        type: integer
+      order_number:
+        type: string
+      payment_status:
+        type: string
+      status:
+        type: string
+      total_amount:
+        type: number
+    type: object
+  handlers.ProcessTemplateRequest:
+    properties:
+      template_id:
+        type: string
+      variables:
+        additionalProperties:
+          type: string
+        type: object
+    required:
+    - template_id
+    - variables
+    type: object
+  handlers.ProcessTemplateResponse:
+    properties:
+      original_content:
+        type: string
+      processed_content:
+        type: string
+      template_title:
+        type: string
+    type: object
+  handlers.ReportDataItem:
+    properties:
+      customers:
+        type: integer
+      orders:
+        type: integer
+      period:
+        type: string
+      products_sold:
+        type: integer
+      revenue:
+        type: number
+    type: object
+  handlers.SalesAnalyticsResponse:
+    properties:
+      average_ticket:
+        type: number
+      conversion_rate:
+        type: number
+      growth_rate:
+        type: number
+      monthly_data:
+        items:
+          $ref: '#/definitions/handlers.ReportDataItem'
+        type: array
+      new_customers:
+        type: integer
+      top_products:
+        items:
+          $ref: '#/definitions/handlers.TopProductItem'
+        type: array
+      total_orders:
+        type: integer
+      total_revenue:
+        type: number
+    type: object
+  handlers.SendEmailRequest:
+    properties:
+      message:
+        type: string
+      order_id:
+        type: string
+      recipient:
+        type: string
+      subject:
+        type: string
+    required:
+    - order_id
+    - recipient
+    - subject
+    type: object
+  handlers.SendMessageRequest:
+    properties:
+      content:
+        type: string
+      conversation_id:
+        type: string
+      reply_to_id:
+        type: string
+      resend_message_id:
+        description: ID of message to resend instead of creating new
+        type: string
+      type:
+        enum:
+        - text
+        - image
+        - audio
+        - video
+        - document
+        type: string
+    required:
+    - content
+    - conversation_id
+    - type
+    type: object
+  handlers.TenantStats:
+    properties:
+      active_tenants:
+        type: integer
+      paid_plan_tenants:
+        type: integer
+      total_conversations:
+        type: integer
+      total_tenants:
+        type: integer
+    type: object
+  handlers.TopProductItem:
+    properties:
+      product_id:
+        type: string
+      product_name:
+        type: string
+      sales_count:
+        type: integer
+      total_revenue:
+        type: number
+    type: object
+  handlers.UpdateMessageStatusRequest:
+    properties:
+      status:
+        type: string
+    required:
+    - status
+    type: object
+  handlers.UpdateTemplateRequest:
+    properties:
+      category:
+        type: string
+      content:
+        type: string
+      description:
+        type: string
+      title:
+        type: string
+      variables:
+        items:
+          type: string
+        type: array
+    required:
+    - content
+    - title
+    type: object
+  handlers.UseCreditsRequest:
+    properties:
+      amount:
+        minimum: 1
+        type: integer
+      description:
+        type: string
+      related_entity:
+        type: string
+      related_id:
+        type: string
+    required:
+    - amount
+    - description
+    type: object
+  models.Address:
+    properties:
+      city:
+        type: string
+      complement:
+        type: string
+      country:
+        type: string
+      created_at:
+        type: string
+      customer_id:
+        type: string
+      id:
+        type: string
+      is_default:
+        type: boolean
+      label:
+        description: home, work, etc.
+        type: string
+      name:
+        description: Added field that exists in table
+        type: string
+      neighborhood:
+        type: string
+      number:
+        type: string
+      state:
+        type: string
+      street:
+        type: string
+      tenant_id:
+        type: string
+      updated_at:
+        type: string
+      zip_code:
+        description: Map to zipcode column
+        type: string
+    required:
+    - city
+    - state
+    - street
+    - zip_code
+    type: object
+  models.Alert:
+    properties:
+      channel:
+        allOf:
+        - $ref: '#/definitions/models.Channel'
+        description: Relations
+      channel_id:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      group_id:
+        description: ID do grupo retornado pela API
+        type: string
+      group_name:
+        description: Nome do grupo do WhatsApp no ZapPlus
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      phones:
+        description: Lista de telefones separados por vírgula
+        type: string
+      tenant_id:
+        type: string
+      trigger_on:
+        description: order_created, message_received, etc.
+        type: string
+      updated_at:
+        type: string
+    required:
+    - group_name
+    - name
+    type: object
+  models.Category:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      image:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      parent_id:
+        type: string
+      sort_order:
+        type: integer
+      tenant_id:
+        type: string
+      updated_at:
+        type: string
+    required:
+    - name
+    type: object
+  models.ChangePasswordRequest:
+    properties:
+      current_password:
+        type: string
+      new_password:
+        minLength: 6
+        type: string
+    required:
+    - current_password
+    - new_password
+    type: object
+  models.Channel:
+    properties:
+      config:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      qr_code:
+        type: string
+      qr_expires_at:
+        type: string
+      session:
+        description: session identifier for WhatsApp integration
+        type: string
+      status:
+        description: disconnected, connecting, connected
+        type: string
+      tenant_id:
+        type: string
+      type:
+        description: whatsapp, webchat, etc.
+        type: string
+      updated_at:
+        type: string
+      webhook_token:
+        type: string
+      webhook_url:
+        type: string
+    required:
+    - name
+    - session
+    - type
+    type: object
+  models.ChannelListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.SwaggerChannelWithConversationCount'
+        type: array
+      page:
+        type: integer
+      per_page:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  models.CharacteristicItem:
+    properties:
+      characteristic_id:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      price:
+        description: Additional price for this option
+        type: string
+      sort_order:
+        type: integer
+      tenant_id:
+        type: string
+      updated_at:
+        type: string
+    required:
+    - name
+    type: object
+  models.Conversation:
+    properties:
+      ai_enabled:
+        type: boolean
+      assigned_agent:
+        $ref: '#/definitions/models.User'
+      assigned_agent_id:
+        type: string
+      channel:
+        $ref: '#/definitions/models.Channel'
+      channel_id:
+        type: string
+      created_at:
+        type: string
+      customer:
+        allOf:
+        - $ref: '#/definitions/models.Customer'
+        description: Relations
+      customer_id:
+        type: string
+      id:
+        type: string
+      is_archived:
+        type: boolean
+      is_pinned:
+        type: boolean
+      last_message_at:
+        type: string
+      priority:
+        type: string
+      status:
+        description: open, closed, waiting
+        type: string
+      tenant_id:
+        type: string
+      unread_count:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  models.CreateCategoryRequest:
+    properties:
+      description:
+        type: string
+      image:
+        type: string
+      name:
+        type: string
+      parent_id:
+        type: string
+      sort_order:
+        type: integer
+      tenant_id:
+        type: string
+    required:
+    - name
+    type: object
+  models.Customer:
+    properties:
+      birth_date:
+        type: string
+      created_at:
+        type: string
+      document:
+        description: CPF/CNPJ
+        type: string
+      email:
+        type: string
+      gender:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      notes:
+        type: string
+      phone:
+        description: Only numbers, no formatting
+        type: string
+      tenant_id:
+        type: string
+      updated_at:
+        type: string
+    required:
+    - phone
+    type: object
+  models.CustomerListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.SwaggerCustomer'
+        type: array
+      page:
+        type: integer
+      per_page:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  models.ForgotPasswordRequest:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
+  models.ImportJob:
+    properties:
+      completed_at:
+        type: string
+      created_at:
+        type: string
+      error_details:
+        type: string
+      error_records:
+        type: integer
+      file_name:
+        type: string
+      file_path:
+        type: string
+      id:
+        type: string
+      processed_records:
+        type: integer
+      result:
+        type: string
+      started_at:
+        type: string
+      status:
+        $ref: '#/definitions/models.ImportJobStatus'
+      success_records:
+        type: integer
+      tenant_id:
+        type: string
+      total_records:
+        type: integer
+      type:
+        $ref: '#/definitions/models.ImportJobType'
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  models.ImportJobProgress:
+    properties:
+      error_details:
+        items:
+          type: string
+        type: array
+      error_records:
+        type: integer
+      job_id:
+        type: string
+      message:
+        type: string
+      processed_records:
+        type: integer
+      progress:
+        description: 0-100
+        type: number
+      status:
+        $ref: '#/definitions/models.ImportJobStatus'
+      success_records:
+        type: integer
+      total_records:
+        type: integer
+    type: object
+  models.ImportJobStatus:
+    enum:
+    - pending
+    - processing
+    - completed
+    - failed
+    type: string
+    x-enum-varnames:
+    - ImportJobStatusPending
+    - ImportJobStatusProcessing
+    - ImportJobStatusCompleted
+    - ImportJobStatusFailed
+  models.ImportJobType:
+    enum:
+    - products
+    type: string
+    x-enum-varnames:
+    - ImportJobTypeProducts
+  models.Message:
+    properties:
+      content:
+        type: string
+      conversation:
+        allOf:
+        - $ref: '#/definitions/models.Conversation'
+        description: Relations
+      conversation_id:
+        type: string
+      created_at:
+        type: string
+      customer:
+        $ref: '#/definitions/models.Customer'
+      customer_id:
+        type: string
+      delivered_at:
+        type: string
+      direction:
+        description: in, out
+        type: string
+      external_id:
+        type: string
+      filename:
+        type: string
+      forwarded_from:
+        type: string
+      id:
+        type: string
+      is_note:
+        description: true for internal notes, false for regular messages
+        type: boolean
+      is_read:
+        type: boolean
+      media_type:
+        type: string
+      media_url:
+        type: string
+      metadata:
+        type: string
+      read_at:
+        type: string
+      reply_to_id:
+        type: string
+      routine_id:
+        description: reference to routine that generated this message
+        type: string
+      source:
+        description: whatsapp, chat
+        type: string
+      status:
+        description: sent, delivered, read, failed
+        type: string
+      tenant_id:
+        type: string
+      type:
+        description: text, image, audio, video, document
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        description: null for incoming messages
+        type: string
+      user_name:
+        description: name of the user who sent the message
+        type: string
+      webhook_id:
+        type: string
+    type: object
+  models.MessageTemplate:
+    properties:
+      category:
+        type: string
+      content:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      tenant_id:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+      usage_count:
+        type: integer
+      user:
+        allOf:
+        - $ref: '#/definitions/models.User'
+        description: Relations
+      user_id:
+        type: string
+      variables:
+        description: JSON array of variable names
+        type: string
+    required:
+    - content
+    - title
+    type: object
+  models.Order:
+    properties:
+      address:
+        $ref: '#/definitions/models.Address'
+      address_id:
+        type: string
+      billing_city:
+        type: string
+      billing_complement:
+        type: string
+      billing_country:
+        type: string
+      billing_name:
+        description: Historical billing address data
+        type: string
+      billing_neighborhood:
+        type: string
+      billing_number:
+        type: string
+      billing_state:
+        type: string
+      billing_street:
+        type: string
+      billing_zipcode:
+        type: string
+      conversation:
+        $ref: '#/definitions/models.Conversation'
+      conversation_id:
+        type: string
+      created_at:
+        type: string
+      currency:
+        type: string
+      customer:
+        allOf:
+        - $ref: '#/definitions/models.Customer'
+        description: Relations
+      customer_document:
+        type: string
+      customer_email:
+        type: string
+      customer_id:
+        type: string
+      customer_name:
+        description: Historical customer data for order integrity
+        type: string
+      customer_phone:
+        type: string
+      delivered_at:
+        type: string
+      discount_amount:
+        type: string
+      fulfillment_status:
+        type: string
+      id:
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/models.OrderItem'
+        type: array
+      notes:
+        type: string
+      order_number:
+        type: string
+      payment_method:
+        $ref: '#/definitions/models.PaymentMethod'
+      payment_method_id:
+        type: string
+      payment_status:
+        type: string
+      payments:
+        items:
+          $ref: '#/definitions/models.Payment'
+        type: array
+      shipped_at:
+        type: string
+      shipping_amount:
+        type: string
+      shipping_city:
+        type: string
+      shipping_complement:
+        type: string
+      shipping_country:
+        type: string
+      shipping_name:
+        description: Historical shipping address data
+        type: string
+      shipping_neighborhood:
+        type: string
+      shipping_number:
+        type: string
+      shipping_state:
+        type: string
+      shipping_street:
+        type: string
+      shipping_zipcode:
+        type: string
+      status:
+        type: string
+      subtotal:
+        type: string
+      tax_amount:
+        type: string
+      tenant_id:
+        type: string
+      total_amount:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.OrderItem:
+    properties:
+      attributes:
+        items:
+          $ref: '#/definitions/models.OrderItemAttribute'
+        type: array
+      created_at:
+        type: string
+      id:
+        type: string
+      order_id:
+        type: string
+      price:
+        type: string
+      product:
+        allOf:
+        - $ref: '#/definitions/models.Product'
+        description: Relations
+      product_category_id:
+        type: string
+      product_category_name:
+        type: string
+      product_description:
+        type: string
+      product_id:
+        description: Nullable for historical data integrity
+        type: string
+      product_name:
+        description: Historical product data for order integrity
+        type: string
+      product_sku:
+        type: string
+      quantity:
+        type: integer
+      tenant_id:
+        type: string
+      total:
+        type: string
+      unit_price:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.OrderItemAttribute:
+    properties:
+      attribute_id:
+        type: string
+      attribute_name:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      option_id:
+        type: string
+      option_name:
+        type: string
+      option_price:
+        type: string
+      order_item:
+        allOf:
+        - $ref: '#/definitions/models.OrderItem'
+        description: Relations
+      order_item_id:
+        type: string
+      tenant_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.OrderListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.SwaggerOrderWithCustomer'
+        type: array
+      page:
+        type: integer
+      per_page:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  models.Payment:
+    properties:
+      amount:
+        type: string
+      confirmed_at:
+        type: string
+      created_at:
+        type: string
+      currency:
+        type: string
+      external_id:
+        description: Payment gateway ID
+        type: string
+      id:
+        type: string
+      method:
+        description: credit_card, pix, boleto, etc.
+        type: string
+      order_id:
+        type: string
+      processed_at:
+        type: string
+      status:
+        type: string
+      tenant_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.PaymentMethod:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      tenant_id:
+        type: string
+      updated_at:
+        type: string
+    required:
+    - name
+    type: object
+  models.Plan:
+    properties:
+      billing_period:
+        type: string
+      created_at:
+        type: string
+      currency:
+        type: string
+      description:
+        type: string
+      features:
+        description: JSON string with additional features
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      is_default:
+        type: boolean
+      max_channels:
+        description: Fixed limit
+        type: integer
+      max_conversations:
+        description: Resource Limits
+        type: integer
+      max_credits_per_month:
+        description: Monthly limit for AI credits
+        type: integer
+      max_messages_per_month:
+        description: Monthly limit
+        type: integer
+      max_products:
+        description: Fixed limit
+        type: integer
+      name:
+        type: string
+      price:
+        minimum: 0
+        type: number
+      stripe_url:
+        description: Stripe payment link URL
+        type: string
+      updated_at:
+        type: string
+    required:
+    - max_channels
+    - max_conversations
+    - max_credits_per_month
+    - max_messages_per_month
+    - max_products
+    - name
+    - price
+    type: object
+  models.Product:
+    properties:
+      barcode:
+        type: string
+      brand:
+        type: string
+      category_id:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      dimensions:
+        description: LxWxH in cm
+        type: string
+      embedding_hash:
+        description: Hash do conteúdo para evitar reprocessamento
+        type: string
+      id:
+        type: string
+      low_stock_threshold:
+        type: integer
+      name:
+        type: string
+      price:
+        type: string
+      sale_price:
+        type: string
+      sku:
+        type: string
+      sort_order:
+        type: integer
+      stock_quantity:
+        type: integer
+      tags:
+        type: string
+      tenant_id:
+        type: string
+      updated_at:
+        type: string
+      weight:
+        description: in grams
+        type: string
+    required:
+    - name
+    - price
+    type: object
+  models.ProductCharacteristic:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      is_multiple_choice:
+        type: boolean
+      is_required:
+        type: boolean
+      items:
+        items:
+          $ref: '#/definitions/models.CharacteristicItem'
+        type: array
+      product_id:
+        type: string
+      sort_order:
+        type: integer
+      tenant_id:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+    required:
+    - title
+    type: object
+  models.ProductImageImportProduct:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      price:
+        type: string
+      status:
+        description: '"success", "error"'
+        type: string
+      tags:
+        type: string
+    type: object
+  models.ProductImageImportResult:
+    properties:
+      created_count:
+        type: integer
+      credits_used:
+        type: integer
+      errors:
+        items:
+          type: string
+        type: array
+      products:
+        items:
+          $ref: '#/definitions/models.ProductImageImportProduct'
+        type: array
+      success:
+        type: boolean
+    type: object
+  models.ProductImportItem:
+    properties:
+      barcode:
+        type: string
+      brand:
+        type: string
+      category_name:
+        description: 'Optional: name of category for lookup'
+        type: string
+      description:
+        type: string
+      dimensions:
+        type: string
+      low_stock_threshold:
+        type: integer
+      name:
+        type: string
+      price:
+        type: string
+      sale_price:
+        type: string
+      sku:
+        type: string
+      stock_quantity:
+        type: integer
+      tags:
+        type: string
+      weight:
+        type: string
+    required:
+    - name
+    - price
+    type: object
+  models.ProductImportItemResult:
+    properties:
+      error:
+        type: string
+      message:
+        type: string
+      name:
+        type: string
+      product_id:
+        type: string
+      row_number:
+        type: integer
+      sku:
+        type: string
+      status:
+        description: '"created", "updated", "error"'
+        type: string
+    type: object
+  models.ProductImportRequest:
+    properties:
+      products:
+        items:
+          $ref: '#/definitions/models.ProductImportItem'
+        type: array
+    required:
+    - products
+    type: object
+  models.ProductImportResult:
+    properties:
+      created:
+        type: integer
+      errors:
+        type: integer
+      results:
+        items:
+          $ref: '#/definitions/models.ProductImportItemResult'
+        type: array
+      total_processed:
+        type: integer
+      updated:
+        type: integer
+    type: object
+  models.ProductListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.SwaggerProduct'
+        type: array
+      page:
+        type: integer
+      per_page:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  models.ProductMedia:
+    properties:
+      alt:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      product_id:
+        type: string
+      s3_key:
+        type: string
+      sort_order:
+        type: integer
+      tenant_id:
+        type: string
+      type:
+        description: image, video
+        type: string
+      updated_at:
+        type: string
+      url:
+        type: string
+    type: object
+  models.ResetPasswordRequest:
+    properties:
+      new_password:
+        minLength: 6
+        type: string
+      token:
+        type: string
+    required:
+    - new_password
+    - token
+    type: object
+  models.SwaggerChannelWithConversationCount:
+    properties:
+      access_token:
+        type: string
+      business_phone:
+        type: string
+      conversation_count:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: string
+      instance_id:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      phone_number:
+        type: string
+      tenant_id:
+        type: string
+      type:
+        type: string
+      updated_at:
+        type: string
+      webhook_token:
+        type: string
+      webhook_url:
+        type: string
+    type: object
+  models.SwaggerCustomer:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+      tenant_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.SwaggerOrderWithCustomer:
+    properties:
+      created_at:
+        type: string
+      customer_email:
+        type: string
+      customer_id:
+        type: string
+      customer_name:
+        type: string
+      id:
+        type: string
+      items_count:
+        type: integer
+      payment_method_name:
+        type: string
+      payment_status:
+        type: string
+      status:
+        type: string
+      tenant_id:
+        type: string
+      total_amount:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  models.SwaggerProduct:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      price:
+        type: integer
+      sku:
+        type: string
+      tenant_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.SwaggerTenantWithAdmin:
+    properties:
+      admin_email:
+        type: string
+      created_at:
+        type: string
+      domain:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      plan:
+        type: string
+      status:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.Tenant:
+    properties:
+      about:
+        type: string
+      business_category:
+        description: Categoria do negócio (Farmacia, Hamburgeria, Pizzaria, etc.)
+        type: string
+      business_type:
+        enum:
+        - sales
+        type: string
+      cost_per_message:
+        description: Credit System Configuration
+        type: integer
+      created_at:
+        type: string
+      delivery_radius_km:
+        description: Delivery Configuration
+        type: integer
+      domain:
+        type: string
+      enable_ai_prompt_customization:
+        description: AI Customization Configuration
+        type: boolean
+      id:
+        type: string
+      is_public_store:
+        description: Store Public Configuration
+        type: boolean
+      max_messages:
+        type: integer
+      max_users:
+        type: integer
+      name:
+        type: string
+      plan:
+        description: Keep for backwards compatibility
+        type: string
+      plan_id:
+        description: Reference to Plan table
+        type: string
+      plan_info:
+        allOf:
+        - $ref: '#/definitions/models.Plan'
+        description: Plan relationship
+      status:
+        type: string
+      store_city:
+        type: string
+      store_complement:
+        type: string
+      store_country:
+        type: string
+      store_latitude:
+        description: Geolocation Fields
+        type: number
+      store_longitude:
+        type: number
+      store_neighborhood:
+        type: string
+      store_number:
+        type: string
+      store_phone:
+        description: Telefone da loja
+        type: string
+      store_state:
+        type: string
+      store_street:
+        description: Store Address Fields
+        type: string
+      store_zip_code:
+        type: string
+      tag:
+        description: TAG única para lojas públicas (obrigatório se IsPublicStore=true)
+        type: string
+      updated_at:
+        type: string
+    required:
+    - business_type
+    - name
+    type: object
+  models.TenantListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.SwaggerTenantWithAdmin'
+        type: array
+      page:
+        type: integer
+      per_page:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  models.TenantUsage:
+    properties:
+      billing_cycle_end:
+        type: string
+      billing_cycle_start:
+        description: Billing cycle tracking
+        type: string
+      channels_count:
+        type: integer
+      conversations_count:
+        description: Current counts (fixed resources)
+        type: integer
+      created_at:
+        type: string
+      credits_used:
+        type: integer
+      id:
+        type: string
+      messages_used:
+        description: Usage counters for current billing cycle
+        type: integer
+      plan:
+        $ref: '#/definitions/models.Plan'
+      plan_id:
+        type: string
+      products_count:
+        type: integer
+      tenant_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.UpdateCategoryRequest:
+    properties:
+      description:
+        type: string
+      image:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      parent_id:
+        type: string
+      sort_order:
+        type: integer
+    type: object
+  models.UpdateProfileRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+    required:
+    - email
+    - name
+    type: object
+  models.UsageLimitResult:
+    properties:
+      allowed:
+        type: boolean
+      current_usage:
+        type: integer
+      message:
+        type: string
+      remaining_quota:
+        type: integer
+      requires_upgrade:
+        type: boolean
+      resource_type:
+        type: string
+      total_limit:
+        type: integer
+    type: object
+  models.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      last_login_at:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+      role:
+        type: string
+      tenant_id:
+        description: null for system admins
+        type: string
+      updated_at:
+        type: string
+    required:
+    - email
+    - name
+    - role
+    type: object
+  services.ProductSearchResult:
+    properties:
+      metadata:
+        additionalProperties: true
+        type: object
+      product_id:
+        type: string
+      score:
+        type: number
+      text:
+        type: string
+    type: object
+  webhook.MediaInfo:
+    properties:
+      filename:
+        type: string
+      mimetype:
+        type: string
+      url:
+        type: string
+    type: object
+  webhook.ZapPlusPayload:
+    properties:
+      _data:
+        properties:
+          ack:
+            type: integer
+          body:
+            type: string
+          from:
+            type: string
+          id:
+            properties:
+              _serialized:
+                type: string
+              fromMe:
+                type: boolean
+              id:
+                type: string
+              remote:
+                type: string
+            type: object
+          t:
+            type: integer
+          to:
+            type: string
+          type:
+            type: string
+          viewed:
+            type: boolean
+        type: object
+      ack:
+        type: integer
+      ackName:
+        type: string
+      body:
+        type: string
+      from:
+        type: string
+      fromMe:
+        type: boolean
+      hasMedia:
+        type: boolean
+      id:
+        type: string
+      media:
+        $ref: '#/definitions/webhook.MediaInfo'
+      mediaUrl:
+        type: string
+      source:
+        type: string
+      timestamp:
+        type: integer
+      to:
+        type: string
+      vCards:
+        items: {}
+        type: array
+    type: object
+  webhook.ZapPlusWebhook:
+    properties:
+      engine:
+        type: string
+      environment:
+        additionalProperties: true
+        type: object
+      event:
+        type: string
+      id:
+        type: string
+      me:
+        properties:
+          id:
+            type: string
+          pushName:
+            type: string
+        type: object
+      metadata:
+        additionalProperties: true
+        type: object
+      payload:
+        $ref: '#/definitions/webhook.ZapPlusPayload'
+      session:
+        type: string
+      timestamp:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: Multi-tenant SaaS para vendas e atendimento via WhatsApp
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: IAFarma API
+  version: "1.0"
+paths:
+  /admin/ai-credits/add:
+    post:
+      consumes:
+      - application/json
+      description: Add AI credits to a specific tenant - only system admin can do
+        this
+      parameters:
+      - description: Add credits request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.AddCreditsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.AICreditResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Add AI credits to tenant (Admin only)
+      tags:
+      - ai-credits
+  /admin/ai-credits/tenant/{tenant_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get AI credits balance for a specific tenant
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: tenant_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.AICreditResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get AI credits for specific tenant (Admin only)
+      tags:
+      - admin-ai-credits
+  /admin/ai-credits/tenant/{tenant_id}/transactions:
+    get:
+      consumes:
+      - application/json
+      description: Get AI credit transaction history for a specific tenant
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: tenant_id
+        required: true
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get AI credit transactions for specific tenant (Admin only)
+      tags:
+      - admin-ai-credits
+  /admin/export/tenants:
+    get:
+      description: Get a list of all tenants to choose from for product export
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get all tenants for export selection
+      tags:
+      - admin-export
+  /admin/export/tenants/{tenant_id}/products:
+    get:
+      description: Export all products from a specific tenant to CSV format for backup
+        purposes
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: tenant_id
+        required: true
+        type: string
+      produces:
+      - text/csv
+      responses:
+        "200":
+          description: CSV file content
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Export tenant products to CSV
+      tags:
+      - admin-export
+  /admin/plans:
+    get:
+      consumes:
+      - application/json
+      description: Get all available plans for SuperAdmin
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Plan'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: List all plans
+      tags:
+      - billing
+    post:
+      consumes:
+      - application/json
+      description: Create a new billing plan (SuperAdmin only)
+      parameters:
+      - description: Plan data
+        in: body
+        name: plan
+        required: true
+        schema:
+          $ref: '#/definitions/models.Plan'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Plan'
+      security:
+      - ApiKeyAuth: []
+      summary: Create new plan
+      tags:
+      - billing
+  /admin/plans/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a plan (SuperAdmin only)
+      parameters:
+      - description: Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      security:
+      - ApiKeyAuth: []
+      summary: Delete plan
+      tags:
+      - billing
+    get:
+      consumes:
+      - application/json
+      description: Get detailed information about a specific plan
+      parameters:
+      - description: Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Plan'
+      security:
+      - ApiKeyAuth: []
+      summary: Get plan by ID
+      tags:
+      - billing
+    put:
+      consumes:
+      - application/json
+      description: Update an existing plan (SuperAdmin only)
+      parameters:
+      - description: Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated plan data
+        in: body
+        name: plan
+        required: true
+        schema:
+          $ref: '#/definitions/models.Plan'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Plan'
+      security:
+      - ApiKeyAuth: []
+      summary: Update plan
+      tags:
+      - billing
+  /admin/stats:
+    get:
+      consumes:
+      - application/json
+      description: Get global system statistics for admin dashboard
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get system statistics
+      tags:
+      - admin
+  /admin/tenants:
+    get:
+      consumes:
+      - application/json
+      description: Get list of tenants with pagination
+      parameters:
+      - default: 20
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.TenantListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List tenants
+      tags:
+      - tenants
+    post:
+      consumes:
+      - application/json
+      description: Create a new tenant
+      parameters:
+      - description: Tenant data
+        in: body
+        name: tenant
+        required: true
+        schema:
+          $ref: '#/definitions/models.Tenant'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Tenant'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create tenant
+      tags:
+      - tenants
+  /admin/tenants/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a tenant and all its associated data (system_admin only)
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete tenant
+      tags:
+      - tenants
+    get:
+      consumes:
+      - application/json
+      description: Get a specific tenant by ID
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Tenant'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get tenant by ID
+      tags:
+      - tenants
+    put:
+      consumes:
+      - application/json
+      description: Update an existing tenant
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Tenant data
+        in: body
+        name: tenant
+        required: true
+        schema:
+          $ref: '#/definitions/models.Tenant'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Tenant'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update tenant
+      tags:
+      - tenants
+  /admin/tenants/{id}/stats:
+    get:
+      consumes:
+      - application/json
+      description: Get conversation and message statistics for a specific tenant
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get tenant statistics
+      tags:
+      - tenants
+  /admin/tenants/{tenant_id}/billing/reset:
+    post:
+      consumes:
+      - application/json
+      description: Reset billing cycle for a tenant (SuperAdmin only)
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: tenant_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Reset tenant billing cycle
+      tags:
+      - billing
+  /admin/tenants/{tenant_id}/channels:
+    get:
+      consumes:
+      - application/json
+      description: List all channels for a specific tenant - only accessible by system
+        admin
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: tenant_id
+        required: true
+        type: string
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ChannelListResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List channels for a specific tenant (Admin only)
+      tags:
+      - admin
+      - channels
+    post:
+      consumes:
+      - application/json
+      description: Create a new channel for a specific tenant - only accessible by
+        system admin
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: tenant_id
+        required: true
+        type: string
+      - description: Channel data
+        in: body
+        name: channel
+        required: true
+        schema:
+          $ref: '#/definitions/models.Channel'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Channel'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a channel for a specific tenant (Admin only)
+      tags:
+      - admin
+      - channels
+  /admin/tenants/{tenant_id}/channels/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a channel for a specific tenant - only accessible by system
+        admin
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: tenant_id
+        required: true
+        type: string
+      - description: Channel ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a channel for a specific tenant (Admin only)
+      tags:
+      - admin
+      - channels
+    put:
+      consumes:
+      - application/json
+      description: Update a channel for a specific tenant - only accessible by system
+        admin
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: tenant_id
+        required: true
+        type: string
+      - description: Channel ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Channel data
+        in: body
+        name: channel
+        required: true
+        schema:
+          $ref: '#/definitions/models.Channel'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Channel'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update a channel for a specific tenant (Admin only)
+      tags:
+      - admin
+      - channels
+  /admin/tenants/{tenant_id}/plan/{plan_id}:
+    put:
+      consumes:
+      - application/json
+      description: Change a tenant's billing plan (SuperAdmin only)
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: tenant_id
+        required: true
+        type: string
+      - description: Plan ID
+        in: path
+        name: plan_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update tenant plan
+      tags:
+      - billing
+  /admin/tenants/{tenant_id}/usage:
+    get:
+      consumes:
+      - application/json
+      description: Get current usage statistics for a specific tenant (SuperAdmin
+        only)
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: tenant_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.TenantUsage'
+      security:
+      - ApiKeyAuth: []
+      summary: Get tenant usage (Admin)
+      tags:
+      - billing
+  /admin/tenants/stats:
+    get:
+      consumes:
+      - application/json
+      description: Get aggregated statistics for all tenants
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.TenantStats'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get tenant statistics
+      tags:
+      - tenants
+  /ai-credits:
+    get:
+      consumes:
+      - application/json
+      description: Get AI credits balance for the current tenant
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.AICreditResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get AI credits for tenant
+      tags:
+      - ai-credits
+  /ai-credits/transactions:
+    get:
+      consumes:
+      - application/json
+      description: Get AI credit transaction history for the current tenant
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get AI credit transactions
+      tags:
+      - ai-credits
+  /ai-credits/use:
+    post:
+      consumes:
+      - application/json
+      description: Use AI credits for AI operations (like product description generation)
+      parameters:
+      - description: Use credits request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.UseCreditsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.AICreditResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "402":
+          description: Payment Required
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Use AI credits
+      tags:
+      - ai-credits
+  /ai/products/estimate:
+    post:
+      consumes:
+      - application/json
+      description: Get estimated credit cost for generating product information
+      parameters:
+      - description: Product name for estimate
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.GenerateProductInfoRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get credit estimate for product generation
+      tags:
+      - ai-products
+  /ai/products/generate:
+    post:
+      consumes:
+      - application/json
+      description: Generate product description and tags using AI based on product
+        name
+      parameters:
+      - description: Generate product info request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.GenerateProductInfoRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ai.ProductGenerationResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "402":
+          description: Payment Required
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Generate product information with AI
+      tags:
+      - ai-products
+  /alerts:
+    get:
+      consumes:
+      - application/json
+      description: Get all alerts for the current tenant
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: limit
+        type: integer
+      - description: Filter by channel ID
+        in: query
+        name: channel_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get alerts
+      tags:
+      - alerts
+    post:
+      consumes:
+      - application/json
+      description: Create a new alert configuration for a channel
+      parameters:
+      - description: Alert data
+        in: body
+        name: alert
+        required: true
+        schema:
+          $ref: '#/definitions/models.Alert'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Alert'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create alert
+      tags:
+      - alerts
+  /alerts/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an alert
+      parameters:
+      - description: Alert ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete alert
+      tags:
+      - alerts
+    get:
+      consumes:
+      - application/json
+      description: Get a specific alert by ID
+      parameters:
+      - description: Alert ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Alert'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get alert by ID
+      tags:
+      - alerts
+    put:
+      consumes:
+      - application/json
+      description: Update an existing alert
+      parameters:
+      - description: Alert ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated alert data
+        in: body
+        name: alert
+        required: true
+        schema:
+          $ref: '#/definitions/models.Alert'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Alert'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update alert
+      tags:
+      - alerts
+  /analytics/orders:
+    get:
+      consumes:
+      - application/json
+      description: Get comprehensive order statistics and metrics for the sales dashboard
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.OrderStatsResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get order statistics for sales dashboard
+      tags:
+      - analytics
+  /analytics/sales:
+    get:
+      consumes:
+      - application/json
+      description: Get comprehensive sales analytics and metrics
+      parameters:
+      - description: Start date (YYYY-MM-DD)
+        in: query
+        name: start_date
+        type: string
+      - description: End date (YYYY-MM-DD)
+        in: query
+        name: end_date
+        type: string
+      - default: monthly
+        description: Period (daily, weekly, monthly)
+        in: query
+        name: period
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.SalesAnalyticsResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get sales analytics
+      tags:
+      - analytics
+  /auth/change-password:
+    put:
+      consumes:
+      - application/json
+      description: Change current user's password
+      parameters:
+      - description: Password change data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.ChangePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Change user password
+      tags:
+      - auth
+  /auth/forgot-password:
+    post:
+      consumes:
+      - application/json
+      description: Send password reset email to user
+      parameters:
+      - description: Email for password reset
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.ForgotPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Request password reset
+      tags:
+      - auth
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and return JWT tokens
+      parameters:
+      - description: Login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login user
+      tags:
+      - auth
+  /auth/profile:
+    put:
+      consumes:
+      - application/json
+      description: Update current user's profile information
+      parameters:
+      - description: Profile data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update user profile
+      tags:
+      - auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Generate new access token from refresh token
+      parameters:
+      - description: Refresh token
+        in: body
+        name: request
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Refresh access token
+      tags:
+      - auth
+  /auth/reset-password:
+    post:
+      consumes:
+      - application/json
+      description: Reset user password using reset token
+      parameters:
+      - description: Reset password data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.ResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Reset password with token
+      tags:
+      - auth
+  /billing/usage:
+    get:
+      consumes:
+      - application/json
+      description: Get current usage statistics for a tenant
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.TenantUsage'
+      security:
+      - ApiKeyAuth: []
+      summary: Get tenant usage
+      tags:
+      - billing
+  /billing/usage/{resource_type}/increment:
+    post:
+      consumes:
+      - application/json
+      description: Increment usage counter for a tenant (for internal API calls)
+      parameters:
+      - description: Resource type
+        in: path
+        name: resource_type
+        required: true
+        type: string
+      - description: Amount to increment
+        in: body
+        name: amount
+        required: true
+        schema:
+          additionalProperties:
+            type: integer
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Increment tenant usage
+      tags:
+      - billing
+  /billing/usage/check:
+    get:
+      consumes:
+      - application/json
+      description: Check if tenant can perform an action based on usage limits
+      parameters:
+      - description: Resource type (messages, credits, conversations, products, channels)
+        in: query
+        name: resource_type
+        required: true
+        type: string
+      - description: 'Amount to check (default: 1)'
+        in: query
+        name: amount
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UsageLimitResult'
+      security:
+      - ApiKeyAuth: []
+      summary: Check usage limit
+      tags:
+      - billing
+  /categories:
+    get:
+      description: Get all categories for a tenant, ordered by sort_order
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Category'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List categories
+      tags:
+      - categories
+    post:
+      consumes:
+      - application/json
+      description: Create a new category
+      parameters:
+      - description: Category data
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Category'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create category
+      tags:
+      - categories
+  /categories/{id}:
+    delete:
+      description: Delete a category
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete category
+      tags:
+      - categories
+    get:
+      description: Get a specific category by ID
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Category'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get category by ID
+      tags:
+      - categories
+    put:
+      consumes:
+      - application/json
+      description: Update an existing category
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Category data
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Category'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update category
+      tags:
+      - categories
+  /categories/parent/{parent_id}:
+    get:
+      description: Get all categories by parent ID
+      parameters:
+      - description: Parent Category ID
+        in: path
+        name: parent_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Category'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get categories by parent
+      tags:
+      - categories
+  /categories/root:
+    get:
+      description: Get all categories without parent for a tenant
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Category'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get root categories
+      tags:
+      - categories
+  /channels:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of channels with pagination
+      parameters:
+      - default: 20
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ChannelListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List channels
+      tags:
+      - channels
+    post:
+      consumes:
+      - application/json
+      description: Create a new channel
+      parameters:
+      - description: Channel data
+        in: body
+        name: channel
+        required: true
+        schema:
+          $ref: '#/definitions/models.Channel'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Channel'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create channel
+      tags:
+      - channels
+  /channels/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a channel by ID (only if it has no conversations)
+      parameters:
+      - description: Channel ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a channel
+      tags:
+      - channels
+    get:
+      consumes:
+      - application/json
+      description: Get a channel by its ID
+      parameters:
+      - description: Channel ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Channel'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get channel by ID
+      tags:
+      - channels
+    put:
+      consumes:
+      - application/json
+      description: Update an existing channel
+      parameters:
+      - description: Channel ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Channel data
+        in: body
+        name: channel
+        required: true
+        schema:
+          $ref: '#/definitions/models.Channel'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Channel'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update channel
+      tags:
+      - channels
+  /channels/{id}/migrate-conversations:
+    post:
+      consumes:
+      - application/json
+      description: Migrate all conversations from source channel to destination channel
+      parameters:
+      - description: Source Channel ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Migration request
+        in: body
+        name: request
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.MigrationResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Migrate conversations between channels
+      tags:
+      - channels
+  /characteristics/{characteristic_id}/items:
+    get:
+      consumes:
+      - application/json
+      description: Get all items for a characteristic
+      parameters:
+      - description: Characteristic ID
+        in: path
+        name: characteristic_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.CharacteristicItem'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get characteristic items
+      tags:
+      - characteristic-items
+    post:
+      consumes:
+      - application/json
+      description: Create a new item for a characteristic
+      parameters:
+      - description: Characteristic ID
+        in: path
+        name: characteristic_id
+        required: true
+        type: string
+      - description: Item data
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/models.CharacteristicItem'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.CharacteristicItem'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create characteristic item
+      tags:
+      - characteristic-items
+  /characteristics/{characteristic_id}/items/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a characteristic item
+      parameters:
+      - description: Characteristic ID
+        in: path
+        name: characteristic_id
+        required: true
+        type: string
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete characteristic item
+      tags:
+      - characteristic-items
+    put:
+      consumes:
+      - application/json
+      description: Update an existing characteristic item
+      parameters:
+      - description: Characteristic ID
+        in: path
+        name: characteristic_id
+        required: true
+        type: string
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Item data
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/models.CharacteristicItem'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.CharacteristicItem'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update characteristic item
+      tags:
+      - characteristic-items
+  /customers:
+    get:
+      consumes:
+      - application/json
+      description: Get list of customers with pagination and search
+      parameters:
+      - default: 20
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset
+        in: query
+        name: offset
+        type: integer
+      - description: Search term
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.CustomerListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List customers
+      tags:
+      - customers
+    post:
+      consumes:
+      - application/json
+      description: Create a new customer
+      parameters:
+      - description: Customer data
+        in: body
+        name: customer
+        required: true
+        schema:
+          $ref: '#/definitions/models.Customer'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Customer'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create customer
+      tags:
+      - customers
+  /customers/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a customer by their ID
+      parameters:
+      - description: Customer ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Customer'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get customer by ID
+      tags:
+      - customers
+    put:
+      consumes:
+      - application/json
+      description: Update an existing customer
+      parameters:
+      - description: Customer ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Customer data
+        in: body
+        name: customer
+        required: true
+        schema:
+          $ref: '#/definitions/models.Customer'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Customer'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update customer
+      tags:
+      - customers
+  /dashboard/conversation-counts:
+    get:
+      description: Get counts of conversations with unread messages for each filter
+        category (novas, em_atendimento, minhas, arquivadas)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.ConversationCounts'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get conversation counts by category with unread messages
+      tags:
+      - dashboard
+  /dashboard/stats:
+    get:
+      description: Get comprehensive statistics for the dashboard
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.DashboardStats'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get dashboard statistics
+      tags:
+      - dashboard
+  /dashboard/unread-messages:
+    get:
+      description: Get the total count of unread messages for the authenticated user's
+        tenant
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              format: int64
+              type: integer
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get count of unread messages
+      tags:
+      - dashboard
+  /import/jobs:
+    get:
+      description: List all import jobs for the current tenant
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      - description: Filter by status
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.ImportJob'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List import jobs
+      tags:
+      - import-jobs
+  /import/jobs/{job_id}/progress:
+    get:
+      description: Get the progress of an import job
+      parameters:
+      - description: Job ID
+        in: path
+        name: job_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ImportJobProgress'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get import job progress
+      tags:
+      - import-jobs
+  /import/products:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Start a new asynchronous product import job
+      parameters:
+      - description: CSV file to import
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/models.ImportJob'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create product import job
+      tags:
+      - import-jobs
+  /message-templates:
+    get:
+      consumes:
+      - application/json
+      description: Get list of message templates for the authenticated user
+      parameters:
+      - default: 50
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset
+        in: query
+        name: offset
+        type: integer
+      - description: Filter by category
+        in: query
+        name: category
+        type: string
+      - description: Search in title and content
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.MessageTemplate'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List user's message templates
+      tags:
+      - message-templates
+    post:
+      consumes:
+      - application/json
+      description: Create a new message template for the authenticated user
+      parameters:
+      - description: Template data
+        in: body
+        name: template
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateTemplateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.MessageTemplate'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create message template
+      tags:
+      - message-templates
+  /message-templates/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a message template (soft delete)
+      parameters:
+      - description: Template ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete message template
+      tags:
+      - message-templates
+    get:
+      consumes:
+      - application/json
+      description: Get a message template by its ID
+      parameters:
+      - description: Template ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.MessageTemplate'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get message template by ID
+      tags:
+      - message-templates
+    put:
+      consumes:
+      - application/json
+      description: Update an existing message template
+      parameters:
+      - description: Template ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Template data
+        in: body
+        name: template
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.UpdateTemplateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.MessageTemplate'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update message template
+      tags:
+      - message-templates
+  /message-templates/categories:
+    get:
+      consumes:
+      - application/json
+      description: Get all categories for user's templates
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get template categories
+      tags:
+      - message-templates
+  /message-templates/process:
+    post:
+      consumes:
+      - application/json
+      description: Process a template by replacing variables with provided values
+      parameters:
+      - description: Process request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.ProcessTemplateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.ProcessTemplateResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Process template with variables
+      tags:
+      - message-templates
+  /messages:
+    get:
+      consumes:
+      - application/json
+      description: Get list of messages for a specific conversation with pagination
+      parameters:
+      - description: Conversation ID
+        in: query
+        name: conversation_id
+        required: true
+        type: string
+      - default: 50
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Message'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List messages by conversation
+      tags:
+      - messages
+    post:
+      consumes:
+      - application/json
+      description: Create a new message
+      parameters:
+      - description: Message data
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/models.Message'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Message'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create message
+      tags:
+      - messages
+  /messages/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a message by its ID
+      parameters:
+      - description: Message ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Message'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get message by ID
+      tags:
+      - messages
+  /messages/notes:
+    post:
+      consumes:
+      - application/json
+      description: Create an internal note for a conversation
+      parameters:
+      - description: Note data
+        in: body
+        name: note
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateNoteRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Message'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create internal note
+      tags:
+      - messages
+  /monitoring/channels/status:
+    get:
+      consumes:
+      - application/json
+      description: Get the current status of the channel monitoring service
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get channel monitoring status
+      tags:
+      - monitoring
+  /municipios/cidades:
+    get:
+      consumes:
+      - application/json
+      description: Get list of Brazilian cities from municipios_brasileiros table
+        filtered by state
+      parameters:
+      - description: State UF code (e.g., SP, RJ)
+        in: query
+        name: uf
+        required: true
+        type: string
+      - description: Search term for city name
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handlers.CidadeResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get Brazilian cities by state
+      tags:
+      - municipios
+  /municipios/estados:
+    get:
+      consumes:
+      - application/json
+      description: Get list of Brazilian states from municipios_brasileiros table,
+        distinct and ordered
+      parameters:
+      - description: Search term for state name or UF
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handlers.EstadoResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get Brazilian states
+      tags:
+      - municipios
+  /orders:
+    get:
+      consumes:
+      - application/json
+      description: Get list of orders with pagination and customer information
+      parameters:
+      - default: 20
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset
+        in: query
+        name: offset
+        type: integer
+      - description: Search term
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.OrderListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List orders
+      tags:
+      - orders
+    post:
+      consumes:
+      - application/json
+      description: Create a new order
+      parameters:
+      - description: Order data
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/models.Order'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Order'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create order
+      tags:
+      - orders
+  /orders/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get an order by its ID
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Order'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get order by ID
+      tags:
+      - orders
+    put:
+      consumes:
+      - application/json
+      description: Update an existing order
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Order data
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/models.Order'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Order'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update order
+      tags:
+      - orders
+  /orders/{id}/items:
+    post:
+      consumes:
+      - application/json
+      description: Add a new item to an existing order
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Order item data
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/models.OrderItem'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Order'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Add item to order
+      tags:
+      - orders
+  /orders/{id}/items/{item_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove an item from an existing order
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Item ID
+        in: path
+        name: item_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Order'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Remove item from order
+      tags:
+      - orders
+    put:
+      consumes:
+      - application/json
+      description: Update quantity or price of an order item
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Item ID
+        in: path
+        name: item_id
+        required: true
+        type: string
+      - description: Updated item data
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/models.OrderItem'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Order'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update order item
+      tags:
+      - orders
+  /orders/send-email:
+    post:
+      consumes:
+      - application/json
+      description: Send order details to a customer via email
+      parameters:
+      - description: Email request data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.SendEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Send order details via email
+      tags:
+      - orders
+  /products:
+    get:
+      consumes:
+      - application/json
+      description: Get list of products with pagination and search
+      parameters:
+      - default: 20
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset
+        in: query
+        name: offset
+        type: integer
+      - description: Search term for name, SKU, or description
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ProductListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List products
+      tags:
+      - products
+    post:
+      consumes:
+      - application/json
+      description: Create a new product
+      parameters:
+      - description: Product data
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/models.Product'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Product'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create product
+      tags:
+      - products
+  /products/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an existing product
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete product
+      tags:
+      - products
+    get:
+      consumes:
+      - application/json
+      description: Get a product by its ID
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Product'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get product by ID
+      tags:
+      - products
+    put:
+      consumes:
+      - application/json
+      description: Update an existing product
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Product data
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/models.Product'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Product'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update product
+      tags:
+      - products
+  /products/{id}/images:
+    get:
+      consumes:
+      - application/json
+      description: Get all images for a product
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.ProductMedia'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get product images
+      tags:
+      - products
+  /products/{id}/images/{image_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a product image
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Image ID
+        in: path
+        name: image_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete product image
+      tags:
+      - products
+  /products/{id}/upload-image:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload an image for a product
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Product image file
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Upload product image
+      tags:
+      - products
+  /products/{product_id}/characteristics:
+    get:
+      consumes:
+      - application/json
+      description: Get all characteristics for a product
+      parameters:
+      - description: Product ID
+        in: path
+        name: product_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.ProductCharacteristic'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get product characteristics
+      tags:
+      - product-characteristics
+    post:
+      consumes:
+      - application/json
+      description: Create a new characteristic for a product
+      parameters:
+      - description: Product ID
+        in: path
+        name: product_id
+        required: true
+        type: string
+      - description: Characteristic data
+        in: body
+        name: characteristic
+        required: true
+        schema:
+          $ref: '#/definitions/models.ProductCharacteristic'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.ProductCharacteristic'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create product characteristic
+      tags:
+      - product-characteristics
+  /products/{product_id}/characteristics/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a characteristic and all its items
+      parameters:
+      - description: Product ID
+        in: path
+        name: product_id
+        required: true
+        type: string
+      - description: Characteristic ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete product characteristic
+      tags:
+      - product-characteristics
+    get:
+      consumes:
+      - application/json
+      description: Get a specific characteristic with its items
+      parameters:
+      - description: Product ID
+        in: path
+        name: product_id
+        required: true
+        type: string
+      - description: Characteristic ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ProductCharacteristic'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get product characteristic by ID
+      tags:
+      - product-characteristics
+    put:
+      consumes:
+      - application/json
+      description: Update an existing characteristic
+      parameters:
+      - description: Product ID
+        in: path
+        name: product_id
+        required: true
+        type: string
+      - description: Characteristic ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Characteristic data
+        in: body
+        name: characteristic
+        required: true
+        schema:
+          $ref: '#/definitions/models.ProductCharacteristic'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ProductCharacteristic'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update product characteristic
+      tags:
+      - product-characteristics
+  /products/admin:
+    get:
+      consumes:
+      - application/json
+      description: Get list of ALL products including those with zero stock for administrative
+        purposes
+      parameters:
+      - default: 20
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset
+        in: query
+        name: offset
+        type: integer
+      - description: Search term for name, SKU, or description
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ProductListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List all products (including out of stock) for admin
+      tags:
+      - products
+  /products/import:
+    post:
+      consumes:
+      - application/json
+      description: Import multiple products from JSON data, with upsert logic
+      parameters:
+      - description: Products import data
+        in: body
+        name: products
+        required: true
+        schema:
+          $ref: '#/definitions/models.ProductImportRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ProductImportResult'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Import products in bulk
+      tags:
+      - products
+  /products/import-image:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Analyze an image (menu, catalog) using AI to extract product information
+        and create products automatically
+      parameters:
+      - description: Image file (JPG, PNG, WebP, PDF)
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ProductImageImportResult'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "402":
+          description: Payment Required
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Import products from image using AI
+      tags:
+      - products
+  /products/import/template:
+    get:
+      description: Download a CSV template for product import
+      produces:
+      - text/csv
+      responses:
+        "200":
+          description: CSV template file
+          schema:
+            type: file
+      security:
+      - BearerAuth: []
+      summary: Get import template
+      tags:
+      - products
+  /products/search:
+    get:
+      consumes:
+      - application/json
+      description: Search products using semantic similarity
+      parameters:
+      - description: Search query
+        in: query
+        name: query
+        required: true
+        type: string
+      - default: 10
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/services.ProductSearchResult'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Semantic search products
+      tags:
+      - products
+  /products/stats:
+    get:
+      consumes:
+      - application/json
+      description: Get comprehensive product statistics for a tenant
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get product statistics
+      tags:
+      - products
+  /reports:
+    get:
+      consumes:
+      - application/json
+      description: Get specific report data by type
+      parameters:
+      - description: Report type (revenue, orders, customers, products)
+        in: query
+        name: type
+        required: true
+        type: string
+      - default: monthly
+        description: Period (daily, weekly, monthly)
+        in: query
+        name: period
+        type: string
+      - description: Start date (YYYY-MM-DD)
+        in: query
+        name: start_date
+        type: string
+      - description: End date (YYYY-MM-DD)
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handlers.ReportDataItem'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get reports data
+      tags:
+      - reports
+  /reports/top-products:
+    get:
+      consumes:
+      - application/json
+      description: Get top-selling products with sales metrics
+      parameters:
+      - default: 10
+        description: Limit results
+        in: query
+        name: limit
+        type: integer
+      - default: monthly
+        description: Period (daily, weekly, monthly)
+        in: query
+        name: period
+        type: string
+      - description: Start date (YYYY-MM-DD)
+        in: query
+        name: start_date
+        type: string
+      - description: End date (YYYY-MM-DD)
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handlers.TopProductItem'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get top products report
+      tags:
+      - reports
+  /tenant/profile:
+    get:
+      consumes:
+      - application/json
+      description: Get the current tenant's profile
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Tenant'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get tenant profile
+      tags:
+      - tenants
+    put:
+      consumes:
+      - application/json
+      description: Update the current tenant's profile (self-update)
+      parameters:
+      - description: Tenant profile data
+        in: body
+        name: tenant
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Tenant'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update tenant profile
+      tags:
+      - tenants
+  /webhook/zapplus:
+    post:
+      consumes:
+      - application/json
+      description: Receive and process ZapPlus webhook messages
+      parameters:
+      - description: ZapPlus webhook data
+        in: body
+        name: webhook
+        required: true
+        schema:
+          $ref: '#/definitions/webhook.ZapPlusWebhook'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Process ZapPlus webhook
+      tags:
+      - webhook
+  /whatsapp/send:
+    post:
+      consumes:
+      - application/json
+      description: Send a message through WhatsApp
+      parameters:
+      - description: Send message request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.SendMessageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Message'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Send WhatsApp message
+      tags:
+      - whatsapp
+  /whatsapp/status:
+    get:
+      consumes:
+      - application/json
+      description: Get the current status of the WhatsApp connection
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get WhatsApp status
+      tags:
+      - whatsapp
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
