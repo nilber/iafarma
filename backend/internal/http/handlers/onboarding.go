@@ -63,6 +63,7 @@ func (h *OnboardingHandler) checkOnboardingStatus(tenant models.Tenant) Onboardi
 	items := []OnboardingItem{
 		h.checkStoreConfiguration(tenant),
 		h.checkProducts(tenant),
+		h.checkPaymentMethods(tenant),
 		h.checkConnectedChannel(tenant),
 	}
 
@@ -148,6 +149,37 @@ func (h *OnboardingHandler) checkProducts(tenant models.Tenant) OnboardingItem {
 	return item
 }
 
+// checkPaymentMethods checks if at least one payment method is registered
+func (h *OnboardingHandler) checkPaymentMethods(tenant models.Tenant) OnboardingItem {
+	item := OnboardingItem{
+		ID:          "payment_methods",
+		Title:       "Cadastrar Métodos de Pagamento",
+		Description: "Configure pelo menos um método de pagamento para aceitar pedidos",
+		ActionURL:   "/payment-methods",
+		Priority:    3,
+		IsCompleted: false,
+	}
+
+	// Check if there's at least one payment method
+	var paymentMethodCount int64
+	err := h.db.Model(&models.PaymentMethod{}).
+		Where("tenant_id = ? AND is_active = ?", tenant.ID, true).
+		Count(&paymentMethodCount).Error
+
+	if err == nil && paymentMethodCount > 0 {
+		item.IsCompleted = true
+
+		// Get the most recent payment method creation time
+		var paymentMethod models.PaymentMethod
+		if err := h.db.Where("tenant_id = ? AND is_active = ?", tenant.ID, true).
+			Order("created_at DESC").First(&paymentMethod).Error; err == nil {
+			item.CompletedAt = &paymentMethod.CreatedAt
+		}
+	}
+
+	return item
+}
+
 // checkConnectedChannel checks if at least one channel is connected (any type)
 func (h *OnboardingHandler) checkConnectedChannel(tenant models.Tenant) OnboardingItem {
 	item := OnboardingItem{
@@ -155,7 +187,7 @@ func (h *OnboardingHandler) checkConnectedChannel(tenant models.Tenant) Onboardi
 		Title:       "Conectar ao WhatsApp",
 		Description: "Pelo menos um canal deve estar conectado para o sistema funcionar",
 		ActionURL:   "/whatsapp/connection",
-		Priority:    3,
+		Priority:    4,
 		IsCompleted: false,
 	}
 

@@ -20,7 +20,8 @@ import {
   ArrowRight,
   X,
   Sparkles,
-  Link
+  Link,
+  CreditCard
 } from 'lucide-react';
 import { apiClient } from '@/lib/api/client';
 import { toast } from 'sonner';
@@ -60,6 +61,8 @@ const getItemIcon = (itemId: string) => {
       return MessageSquare;
     case 'products':
       return Package;
+    case 'payment_methods':
+      return CreditCard;
     case 'channel_connection':
       return Link;
     default:
