@@ -194,12 +194,6 @@ func sendOrderAlert(db *gorm.DB, tenantID uuid.UUID, order *models.Order, custom
 	return notificationService.SendOrderAlert(tenantID, order, customerPhone)
 }
 
-// sendGroupMessage sends a message to the WhatsApp group
-func sendGroupMessage(groupID, message, session string) error {
-	client := zapplus.GetClient()
-	return client.SendGroupMessage(session, groupID, message)
-}
-
 // defaultDeliveryService is a simple implementation for when no delivery service is provided
 type defaultDeliveryService struct{}
 

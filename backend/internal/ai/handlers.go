@@ -791,10 +791,6 @@ func (s *AIService) handleRemoverDoCarrinho(tenantID, customerID uuid.UUID, args
 	return "✅ Item removido do carrinho com sucesso!", nil
 }
 
-func (s *AIService) handleVerCarrinho(tenantID, customerID uuid.UUID) (string, error) {
-	return s.handleVerCarrinhoWithOptions(tenantID, customerID, true)
-}
-
 // handleVerCarrinhoWithOptions permite controlar se mostra as instruções de gerenciamento
 func (s *AIService) handleVerCarrinhoWithOptions(tenantID, customerID uuid.UUID, showManagementInstructions bool) (string, error) {
 	// Obter carrinho com itens
@@ -1347,33 +1343,6 @@ func (s *AIService) handleHistoricoPedidos(tenantID, customerID uuid.UUID) (stri
 	s.memoryManager.StoreTempData(tenantID, customerID.String(), memoryData)
 
 	result += "💡 Para cancelar um pedido pendente, use: 'cancelar pedido [número]' ou 'cancelar pedido [código]'"
-
-	return result, nil
-}
-
-func (s *AIService) handleOpcoesPagamento(tenantID uuid.UUID) (string, error) {
-	options, err := s.orderService.GetPaymentOptions(tenantID)
-	if err != nil {
-		return "❌ Erro ao carregar opções de pagamento.", err
-	}
-
-	result := "💳 **Opções de Pagamento Disponíveis:**\n\n"
-
-	for i, option := range options {
-		result += fmt.Sprintf("%d. **%s**\n", i+1, option.Name)
-		result += fmt.Sprintf("   %s\n\n", option.Instructions)
-	}
-
-	if len(options) == 0 {
-		result += "1. **PIX** 📱\n"
-		result += "   Chave PIX (teste): `usuario@teste.com`\n"
-		result += "   Envie o comprovante após o pagamento\n\n"
-		result += "2. **Dinheiro** 💵\n"
-		result += "   Pagamento na entrega\n"
-		result += "   O entregador receberá o valor exato\n\n"
-	}
-
-	result += "💡 Escolha uma opção e confirme seu pagamento!"
 
 	return result, nil
 }
@@ -2403,31 +2372,6 @@ func (s *AIService) detectBusinessType(products []models.Product) string {
 	} else {
 		return "grande_comercio"
 	}
-}
-
-// checkAddressConfirmation verifica se precisa confirmar o endereço
-func (s *AIService) checkAddressConfirmation(tenantID, customerID uuid.UUID) (bool, string, error) {
-	addresses, err := s.addressService.GetAddressesByCustomer(tenantID, customerID)
-	if err != nil || len(addresses) == 0 {
-		return false, "", nil
-	}
-
-	defaultAddress := addresses[0]
-	for _, addr := range addresses {
-		if addr.IsDefault {
-			defaultAddress = addr
-			break
-		}
-	}
-
-	if !isAddressComplete(defaultAddress) {
-		return false, "", nil
-	}
-
-	addressText := formatAddressForDisplay(defaultAddress)
-	confirmationMessage := fmt.Sprintf("📋 **Confirme seu endereço de entrega:**\n\n%s\n\n✅ **Este endereço está correto?**\n\n💬 Responda 'sim' para confirmar ou informe o novo endereço.", addressText)
-
-	return true, confirmationMessage, nil
 }
 
 // formatAddressForDisplay formata um endereço para exibição

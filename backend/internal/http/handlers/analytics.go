@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -544,62 +543,6 @@ func (h *AnalyticsHandler) GetReportsData(c echo.Context) error {
 	default:
 		return c.JSON(http.StatusOK, []ReportDataItem{})
 	}
-}
-
-// getMonthlyReportsData returns monthly aggregated data (for the chart)
-// getDailyReportsData returns aggregated data for the selected period (for KPIs)
-func (h *AnalyticsHandler) getDailyReportsData(c echo.Context, tenantID string, startDate, endDate time.Time) error {
-	fmt.Printf("DEBUG: getDailyReportsData called for tenant: %s\n", tenantID)
-	fmt.Printf("DEBUG: Date range: %s to %s\n", startDate.Format("2006-01-02"), endDate.Format("2006-01-02"))
-
-	type PeriodResult struct {
-		Revenue      float64 `gorm:"column:revenue"`
-		Orders       int64   `gorm:"column:orders"`
-		Customers    int64   `gorm:"column:customers"`
-		ProductsSold int64   `gorm:"column:products_sold"`
-	}
-
-	var result PeriodResult
-
-	// Consulta com timeout para evitar hang
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	query := `
-		SELECT 
-			COALESCE(SUM(CAST(total_amount AS DECIMAL)), 0) as revenue,
-			COUNT(id) as orders,
-			COUNT(DISTINCT customer_id) as customers,
-			0 as products_sold
-		FROM orders 
-		WHERE tenant_id = $1 
-		  AND created_at BETWEEN $2 AND $3
-		  AND status NOT IN ('cancelled', 'refunded')
-	`
-
-	err := h.db.WithContext(ctx).Raw(query, tenantID, startDate, endDate).Scan(&result).Error
-	if err != nil {
-		fmt.Printf("DEBUG: Error in daily query: %v\n", err)
-		// Se der timeout, retornar dados básicos
-		result = PeriodResult{Revenue: 0, Orders: 0, Customers: 0, ProductsSold: 0}
-	}
-
-	fmt.Printf("DEBUG: Period data - Revenue: %.2f, Orders: %d, Customers: %d, Products: %d\n",
-		result.Revenue, result.Orders, result.Customers, result.ProductsSold)
-
-	// Retornar dados agregados do período
-	dailyData := []ReportDataItem{
-		{
-			Period:       "Período Selecionado",
-			Revenue:      result.Revenue,
-			Orders:       int(result.Orders),
-			Customers:    int(result.Customers),
-			ProductsSold: int(result.ProductsSold),
-		},
-	}
-
-	fmt.Printf("DEBUG: Returning daily data with %d items\n", len(dailyData))
-	return c.JSON(http.StatusOK, dailyData)
 }
 
 // GetTopProducts godoc

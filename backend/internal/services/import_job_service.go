@@ -458,56 +458,6 @@ func (s *ImportJobService) findOrCreateCategory(tenantID uuid.UUID, categoryName
 	return nil, err
 }
 
-// createOrUpdateProduct cria ou atualiza um produto
-func (s *ImportJobService) createOrUpdateProduct(ctx context.Context, product *models.Product) error {
-	// Verificar se produto já existe pelo SKU ou nome
-	var existingProduct models.Product
-	err := s.db.WithContext(ctx).Where("tenant_id = ? AND (sku = ? OR name = ?)",
-		product.TenantID, product.SKU, product.Name).First(&existingProduct).Error
-
-	var isNewProduct bool
-	if err == gorm.ErrRecordNotFound {
-		// Criar novo produto
-		isNewProduct = true
-		err = s.db.WithContext(ctx).Create(product).Error
-	} else if err != nil {
-		return fmt.Errorf("erro ao verificar produto existente: %w", err)
-	} else {
-		// Atualizar produto existente
-		product.ID = existingProduct.ID
-		product.CreatedAt = existingProduct.CreatedAt
-		err = s.db.WithContext(ctx).Save(product).Error
-	}
-
-	if err != nil {
-		return err
-	}
-
-	// Registrar produto no RAG se o embedding service estiver disponível
-	if s.embeddingService != nil {
-		go func() {
-			searchText := product.GetSearchText()
-			metadata := product.GetMetadata()
-			if err := s.embeddingService.StoreProductEmbedding(
-				product.ID.String(),
-				product.TenantID.String(),
-				searchText,
-				metadata,
-			); err != nil {
-				log.Printf("Failed to store embedding for product %s: %v", product.ID, err)
-			} else {
-				if isNewProduct {
-					log.Printf("Product embedding stored successfully for product %s in tenant %s", product.ID, product.TenantID)
-				} else {
-					log.Printf("Product embedding updated successfully for product %s in tenant %s", product.ID, product.TenantID)
-				}
-			}
-		}()
-	}
-
-	return nil
-}
-
 // createOrUpdateProductWithoutRAG cria ou atualiza um produto sem processar embeddings
 func (s *ImportJobService) createOrUpdateProductWithoutRAG(ctx context.Context, product *models.Product) error {
 	// Usar o mesmo método UpsertProduct que a importação regular usa

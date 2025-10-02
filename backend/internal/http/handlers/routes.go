@@ -1,9 +1,7 @@
 package handlers
 
 import (
-	"fmt"
 	"log"
-	"os"
 
 	"iafarma/internal/ai"
 	"iafarma/internal/app"
@@ -500,47 +498,4 @@ func createEmbeddingAdapter(embeddingService *servicesPackage.EmbeddingService) 
 			return embeddingService.CleanupOldConversations(tenantID, customerID, maxAgeHours)
 		},
 	)
-}
-
-// reloadEmbeddingService recarrega o EmbeddingService com a URL correta
-func reloadEmbeddingService(c echo.Context, services *app.Services, wsHandler *WebSocketHandler, zapPlusWebhookHandler *webhook.ZapPlusWebhookHandler) error {
-	openaiAPIKey := os.Getenv("OPENAI_API_KEY")
-	qdrantURL := os.Getenv("QDRANT_URL")
-	qdrantPassword := os.Getenv("QDRANT_PASSWORD")
-
-	if openaiAPIKey == "" {
-		return c.JSON(400, map[string]string{"error": "OPENAI_API_KEY not set"})
-	}
-
-	if qdrantURL == "" {
-		return c.JSON(400, map[string]string{"error": "QDRANT_URL not set"})
-	}
-
-	// Tentar criar novo EmbeddingService
-	embeddingService, err := servicesPackage.NewEmbeddingService(openaiAPIKey, qdrantURL, qdrantPassword)
-	if err != nil {
-		return c.JSON(500, map[string]string{
-			"error": fmt.Sprintf("Failed to initialize embedding service: %v", err),
-		})
-	}
-
-	// Atualizar o serviço na estrutura global
-	appServices := services // Renomear para evitar conflito
-	appServices.EmbeddingService = embeddingService
-
-	// Reconfigurar o webhook handler com o novo embedding service
-	if embeddingService != nil {
-		embeddingAdapter := createEmbeddingAdapter(embeddingService)
-
-		// Atualizar o ZapPlusWebhookHandler
-		zapPlusWebhookHandler.SetAIServiceWithEmbedding(embeddingAdapter)
-
-		return c.JSON(200, map[string]string{
-			"status":     "success",
-			"message":    "EmbeddingService reloaded successfully",
-			"qdrant_url": qdrantURL,
-		})
-	} else {
-		return c.JSON(500, map[string]string{"error": "Failed to create embedding service"})
-	}
 }
