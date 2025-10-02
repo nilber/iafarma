@@ -337,9 +337,27 @@ func (s *CartServiceImpl) UpdateCartItemQuantity(cartID, tenantID, itemID uuid.U
 
 func (s *CartServiceImpl) GetCartWithItems(cartID, tenantID uuid.UUID) (*models.Cart, error) {
 	var cart models.Cart
-	err := s.db.Preload("Items").Preload("Items.Product").
+	err := s.db.Preload("Items").Preload("Items.Product").Preload("PaymentMethod").
 		Where("id = ? AND tenant_id = ?", cartID, tenantID).First(&cart).Error
 	return &cart, err
+}
+
+func (s *CartServiceImpl) UpdateCartPaymentMethod(cartID, tenantID, paymentMethodID uuid.UUID) error {
+	return s.db.Model(&models.Cart{}).
+		Where("id = ? AND tenant_id = ?", cartID, tenantID).
+		Update("payment_method_id", paymentMethodID).Error
+}
+
+func (s *CartServiceImpl) UpdateCartObservations(cartID, tenantID uuid.UUID, observations, changeFor string) error {
+	updates := map[string]interface{}{
+		"observations": observations,
+	}
+	if changeFor != "" {
+		updates["change_for"] = changeFor
+	}
+	return s.db.Model(&models.Cart{}).
+		Where("id = ? AND tenant_id = ?", cartID, tenantID).
+		Updates(updates).Error
 }
 
 // OrderServiceImpl implementa OrderServiceInterface
@@ -436,6 +454,17 @@ func (s *OrderServiceImpl) CreateOrderFromCartWithConversation(tenantID, cartID,
 
 		fmt.Printf("DEBUG CreateOrderFromCart - Endereço de entrega copiado: %s, %s, %s, %s\n",
 			deliveryAddress.Street, deliveryAddress.Number, deliveryAddress.Neighborhood, deliveryAddress.City)
+	}
+
+	// 💳 Copiar dados de pagamento do carrinho para o pedido
+	if cart.PaymentMethodID != nil {
+		order.PaymentMethodID = cart.PaymentMethodID
+	}
+	if cart.Observations != "" {
+		order.Observations = cart.Observations
+	}
+	if cart.ChangeFor != "" {
+		order.ChangeFor = cart.ChangeFor
 	}
 
 	// Iniciar transação para garantir consistência
@@ -543,22 +572,24 @@ func (s *OrderServiceImpl) GetOrdersByCustomer(tenantID, customerID uuid.UUID) (
 }
 
 func (s *OrderServiceImpl) GetPaymentOptions(tenantID uuid.UUID) ([]PaymentOption, error) {
-	options := []PaymentOption{
-		{
-			ID:           "pix",
-			Name:         "PIX",
-			Instructions: "Envie PIX para a chave: vendas@empresa.com",
-		},
-		{
-			ID:           "dinheiro",
-			Name:         "Dinheiro",
-			Instructions: "Pagamento na entrega em dinheiro",
-		},
-		{
-			ID:           "cartao",
-			Name:         "Cartão na Entrega",
-			Instructions: "Pagamento com cartão na entrega",
-		},
+	// Buscar formas de pagamento do banco de dados
+	var paymentMethods []models.PaymentMethod
+	err := s.db.Where("tenant_id = ? AND is_active = ?", tenantID, true).
+		Order("name ASC").
+		Find(&paymentMethods).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Converter para PaymentOption
+	options := make([]PaymentOption, len(paymentMethods))
+	for i, pm := range paymentMethods {
+		options[i] = PaymentOption{
+			ID:           pm.ID.String(),
+			Name:         pm.Name,
+			Instructions: "",
+		}
 	}
 	return options, nil
 }

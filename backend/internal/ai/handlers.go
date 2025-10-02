@@ -1085,6 +1085,38 @@ func (s *AIService) handleCheckout(tenantID, customerID uuid.UUID, customerPhone
 		return fmt.Sprintf("%s\n\n📝 Para seguir com seu pedido, precisamos completar o seu cadastro.\n\n🙋‍♂️ **Por favor, me informe seu nome completo:**", cartMessage), nil
 	}
 
+	// 💳 VALIDAÇÃO OBRIGATÓRIA: Verificar se forma de pagamento foi selecionada (ANTES do endereço)
+	// Primeiro obter o carrinho ativo
+	activeCart, err := s.cartService.GetOrCreateActiveCart(tenantID, customerID)
+	if err != nil {
+		return "❌ Erro ao verificar carrinho.", err
+	}
+
+	// Agora buscar com os itens
+	cart, err := s.cartService.GetCartWithItems(activeCart.ID, tenantID)
+	if err != nil {
+		return "❌ Erro ao verificar carrinho.", err
+	}
+
+	if cart.PaymentMethodID == nil {
+		// Buscar formas de pagamento disponíveis
+		paymentOptions, err := s.orderService.GetPaymentOptions(tenantID)
+		if err != nil || len(paymentOptions) == 0 {
+			// Se não há formas de pagamento cadastradas, continuar sem bloquear
+			log.Warn().Str("tenant_id", tenantID.String()).Msg("Nenhuma forma de pagamento cadastrada para o tenant")
+		} else {
+			// Mostrar opções de pagamento e bloquear até escolher
+			result := fmt.Sprintf("%s\n\n💳 **Escolha a forma de pagamento:**\n\n", cartMessage)
+			for i, option := range paymentOptions {
+				result += fmt.Sprintf("%d. %s\n", i+1, option.Name)
+			}
+			result += "\n💬 **Como você quer pagar?** Me diga o número ou nome da forma de pagamento.\n"
+			result += "\n💡 **Exemplo:** 'quero pagar com PIX' ou 'número 1'"
+
+			return result, nil
+		}
+	}
+
 	// Verificar se tem endereços
 	addresses, err := s.addressService.GetAddressesByCustomer(tenantID, customerID)
 	if err != nil || len(addresses) == 0 {
@@ -1344,6 +1376,133 @@ func (s *AIService) handleOpcoesPagamento(tenantID uuid.UUID) (string, error) {
 	result += "💡 Escolha uma opção e confirme seu pagamento!"
 
 	return result, nil
+}
+
+// handleSelecionarFormaPagamento registra a forma de pagamento escolhida pelo cliente
+func (s *AIService) handleSelecionarFormaPagamento(tenantID, customerID uuid.UUID, args map[string]interface{}) (string, error) {
+	var paymentMethodID uuid.UUID
+	var paymentMethodName string
+
+	// Tentar obter ID ou nome do método de pagamento
+	if paymentMethodIDStr, ok := args["payment_method_id"].(string); ok && paymentMethodIDStr != "" {
+		// Tentar como UUID primeiro
+		if id, err := uuid.Parse(paymentMethodIDStr); err == nil {
+			paymentMethodID = id
+		} else {
+			// Se não for UUID, tratar como nome
+			paymentMethodName = paymentMethodIDStr
+		}
+	}
+
+	// Se foi passado nome, buscar ID pelo nome
+	if paymentMethodName != "" || (paymentMethodID == uuid.Nil) {
+		if paymentMethodName == "" {
+			paymentMethodName, _ = args["payment_method_name"].(string)
+		}
+
+		// Buscar forma de pagamento pelo nome
+		paymentOptions, err := s.orderService.GetPaymentOptions(tenantID)
+		if err != nil {
+			return "❌ Erro ao buscar formas de pagamento.", err
+		}
+
+		// Buscar por nome (case insensitive)
+		found := false
+		searchName := strings.ToLower(strings.TrimSpace(paymentMethodName))
+		for _, option := range paymentOptions {
+			if strings.ToLower(option.Name) == searchName || strings.Contains(strings.ToLower(option.Name), searchName) {
+				paymentMethodID, _ = uuid.Parse(option.ID)
+				paymentMethodName = option.Name
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			return fmt.Sprintf("❌ Forma de pagamento '%s' não encontrada. Formas disponíveis: %v",
+				paymentMethodName,
+				func() []string {
+					names := make([]string, len(paymentOptions))
+					for i, opt := range paymentOptions {
+						names[i] = opt.Name
+					}
+					return names
+				}()), nil
+		}
+	}
+
+	if paymentMethodID == uuid.Nil {
+		return "❌ Erro: Forma de pagamento não informada.", fmt.Errorf("payment_method not provided")
+	}
+
+	// Buscar o carrinho ativo do cliente
+	activeCart, err := s.cartService.GetOrCreateActiveCart(tenantID, customerID)
+	if err != nil {
+		return "❌ Erro ao acessar carrinho.", err
+	}
+
+	cart, err := s.cartService.GetCartWithItems(activeCart.ID, tenantID)
+	if err != nil {
+		return "❌ Você ainda não tem produtos no carrinho. Adicione produtos antes de selecionar o pagamento.", err
+	}
+
+	// Atualizar o método de pagamento no carrinho
+	err = s.cartService.UpdateCartPaymentMethod(cart.ID, tenantID, paymentMethodID)
+	if err != nil {
+		return "❌ Erro ao registrar a forma de pagamento. Tente novamente.", err
+	}
+
+	// Verificar se precisa de troco
+	needsChange, _ := args["needs_change"].(bool)
+	changeForAmount, _ := args["change_for_amount"].(string)
+	observations, _ := args["observations"].(string)
+
+	// Se precisa de troco, atualizar observações
+	if needsChange && changeForAmount != "" {
+		err = s.cartService.UpdateCartObservations(cart.ID, tenantID, observations, changeForAmount)
+		if err != nil {
+			log.Warn().Err(err).Msg("Erro ao salvar observações de troco")
+		}
+	}
+
+	// Buscar informações do método de pagamento para confirmar (se ainda não temos o nome)
+	if paymentMethodName == "" {
+		paymentOptions2, err := s.orderService.GetPaymentOptions(tenantID)
+		if err != nil {
+			return "✅ Forma de pagamento registrada com sucesso!", nil
+		}
+
+		for _, option := range paymentOptions2 {
+			if option.ID == paymentMethodID.String() {
+				paymentMethodName = option.Name
+				break
+			}
+		}
+	}
+
+	if paymentMethodName == "" {
+		paymentMethodName = "Forma de pagamento selecionada"
+	}
+
+	result := fmt.Sprintf("✅ **Forma de pagamento registrada:**\n\n💳 %s\n", paymentMethodName)
+
+	if needsChange && changeForAmount != "" {
+		result += fmt.Sprintf("\n💵 Troco para: R$ %s\n", changeForAmount)
+	}
+
+	if observations != "" {
+		result += fmt.Sprintf("\n📝 Observação: %s\n", observations)
+	}
+
+	result += "\n✨ Agora você pode finalizar seu pedido! Digite 'finalizar pedido' ou 'checkout' quando estiver pronto."
+
+	return result, nil
+}
+
+// handleTrocarFormaPagamento permite alterar a forma de pagamento já selecionada
+func (s *AIService) handleTrocarFormaPagamento(tenantID, customerID uuid.UUID, args map[string]interface{}) (string, error) {
+	// Reutiliza a mesma lógica de seleção
+	return s.handleSelecionarFormaPagamento(tenantID, customerID, args)
 }
 
 func (s *AIService) handleAtualizarCadastro(tenantID, customerID uuid.UUID, customerPhone string, args map[string]interface{}) (string, error) {

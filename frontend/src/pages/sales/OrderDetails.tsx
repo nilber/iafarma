@@ -498,6 +498,14 @@ export default function OrderDetails() {
                   <div class="info-item"><strong>Taxa:</strong> R$ ${parseFloat(order?.tax_amount || '0').toFixed(2)}</div>
                   <div class="total-final"><strong>Total:</strong> R$ ${parseFloat(order?.total_amount || '0').toFixed(2)}</div>
                 </div>
+                
+                ${order?.observations || order?.change_for ? `
+                <div class="section">
+                  <div class="section-title">Observações do Pedido</div>
+                  ${order?.observations ? `<div class="info-item"><strong>Observações:</strong> ${order.observations}</div>` : ''}
+                  ${order?.change_for ? `<div class="info-item"><strong>Troco para:</strong> R$ ${order.change_for}</div>` : ''}
+                </div>
+                ` : ''}
               </div>
             </div>
 
@@ -1289,6 +1297,26 @@ export default function OrderDetails() {
                   R$ {parseFloat(order.total_amount || '0').toFixed(2).replace('.', ',')}
                 </span>
               </div>
+              
+              {/* Observações do Pedido */}
+              {(order.observations || order.change_for) && (
+                <>
+                  <Separator className="mt-4" />
+                  <div className="mt-4 space-y-2">
+                    <h4 className="font-medium text-sm text-muted-foreground">Observações</h4>
+                    {order.observations && (
+                      <div className="text-sm">
+                        <span className="font-medium">Obs:</span> {order.observations}
+                      </div>
+                    )}
+                    {order.change_for && (
+                      <div className="text-sm">
+                        <span className="font-medium">Troco para:</span> R$ {order.change_for}
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
         </div>

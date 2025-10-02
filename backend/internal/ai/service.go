@@ -60,6 +60,8 @@ type CartServiceInterface interface {
 	ClearCart(cartID, tenantID uuid.UUID) error
 	UpdateCartItemQuantity(cartID, tenantID, itemID uuid.UUID, quantity int) error
 	GetCartWithItems(cartID, tenantID uuid.UUID) (*models.Cart, error)
+	UpdateCartPaymentMethod(cartID, tenantID, paymentMethodID uuid.UUID) error
+	UpdateCartObservations(cartID, tenantID uuid.UUID, observations, changeFor string) error
 }
 
 type OrderServiceInterface interface {
@@ -1866,17 +1868,34 @@ func (s *AIService) getSystemPrompt(customer *models.Customer) string {
 	// Buscar limitação de contexto personalizada
 	contextLimitationSection := s.getContextLimitationSection(ctx, customer.TenantID)
 
+	// Buscar formas de pagamento disponíveis
+	paymentOptions, err := s.orderService.GetPaymentOptions(customer.TenantID)
+	var paymentSection string
+	if err == nil && len(paymentOptions) > 0 {
+		paymentSection = "\n\n**FORMAS DE PAGAMENTO DISPONÍVEIS:**\n"
+		for _, option := range paymentOptions {
+			paymentSection += fmt.Sprintf("- %s (ID: %s)\n", option.Name, option.ID)
+		}
+		paymentSection += "\n**INSTRUÇÃO IMPORTANTE SOBRE PAGAMENTO:**\n"
+		paymentSection += "� O sistema irá solicitar a forma de pagamento automaticamente durante o checkout\n"
+		paymentSection += "� Use a função 'selecionarFormaPagamento' quando cliente mencionar como quer pagar\n"
+		paymentSection += "� Se o cliente escolher DINHEIRO, pergunte: 'Vai precisar de troco? Se sim, troco para quanto?'\n"
+		paymentSection += "� Se precisar de troco, registre o valor usando o parâmetro 'change_for_amount'\n"
+		paymentSection += "� Cliente pode escolher pagamento a qualquer momento ou durante o checkout\n"
+	}
+
 	return fmt.Sprintf(`Você é um assistente de vendas inteligente para %s via WhatsApp.
 
 CLIENTE: %s (ID: %s, Telefone: %s)
 
 SOBRE O NEGÓCIO:
 - Tipo: %s
-- Especialidade: %s%s
+- Especialidade: %s%s%s
 
 SUAS CAPACIDADES:
 🔍 Pesquisar produtos no catálogo
-🛒 Gerenciar carrinho de compras  
+🛒 Gerenciar carrinho de compras
+💳 Gerenciar formas de pagamento  
 📦 Processar pedidos e checkout
 📍 Verificar entregas e endereços
 � Atualizar dados do cliente
@@ -1940,6 +1959,7 @@ REGRA SIMPLES: Confie na sua inteligência para entender o que o cliente quer e 
 		businessInfo.Type,
 		businessInfo.Description,
 		hoursSection,
+		paymentSection,
 		contextLimitationSection,
 	)
 }
@@ -2613,6 +2633,64 @@ func (s *AIService) getAvailableTools() []openai.Tool {
 		{
 			Type: openai.ToolTypeFunction,
 			Function: &openai.FunctionDefinition{
+				Name:        "selecionarFormaPagamento",
+				Description: "💳 OBRIGATÓRIO ANTES DO CHECKOUT: Use quando cliente informar como quer pagar o pedido. Registra a forma de pagamento escolhida pelo cliente. Você pode usar o NOME da forma de pagamento que o cliente mencionar (ex: 'dinheiro', 'pix', 'cartão'). Se o cliente escolher DINHEIRO, pergunte: 'Vai precisar de troco? Se sim, troco para quanto?' e registre a resposta no parâmetro change_for_amount. Esta função DEVE ser chamada antes de usar a função 'checkout'.",
+				Parameters: map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"payment_method_id": map[string]interface{}{
+							"type":        "string",
+							"description": "Nome ou ID da forma de pagamento escolhida pelo cliente (ex: 'dinheiro', 'pix', 'cartão de crédito', 'cartão de débito')",
+						},
+						"needs_change": map[string]interface{}{
+							"type":        "boolean",
+							"description": "Se true, cliente precisa de troco (apenas para pagamento em dinheiro)",
+						},
+						"change_for_amount": map[string]interface{}{
+							"type":        "string",
+							"description": "Valor para o qual o cliente precisa de troco (ex: '50', '100'). Usado apenas quando needs_change=true",
+						},
+						"observations": map[string]interface{}{
+							"type":        "string",
+							"description": "Observações adicionais sobre o pagamento fornecidas pelo cliente",
+						},
+					},
+					"required": []string{"payment_method_id"},
+				},
+			},
+		},
+		{
+			Type: openai.ToolTypeFunction,
+			Function: &openai.FunctionDefinition{
+				Name:        "trocarFormaPagamento",
+				Description: "💳 Use quando cliente quiser ALTERAR a forma de pagamento já selecionada. Ex: 'mudei de ideia', 'quero pagar com PIX agora', 'vou pagar em dinheiro', 'mudar pagamento'",
+				Parameters: map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"payment_method_id": map[string]interface{}{
+							"type":        "string",
+							"description": "Nome ou ID da NOVA forma de pagamento escolhida pelo cliente (ex: 'dinheiro', 'pix', 'cartão')",
+						},
+						"needs_change": map[string]interface{}{
+							"type":        "boolean",
+							"description": "Se true, cliente precisa de troco (apenas para pagamento em dinheiro)",
+						},
+						"change_for_amount": map[string]interface{}{
+							"type":        "string",
+							"description": "Valor para o qual o cliente precisa de troco (ex: '50', '100'). Usado apenas quando needs_change=true",
+						},
+						"observations": map[string]interface{}{
+							"type":        "string",
+							"description": "Observações adicionais sobre o pagamento",
+						},
+					},
+					"required": []string{"payment_method_id"},
+				},
+			},
+		},
+		{
+			Type: openai.ToolTypeFunction,
+			Function: &openai.FunctionDefinition{
 				Name:        "solicitarAtendimentoHumano",
 				Description: "Solicita atendimento humano quando cliente demonstra necessidade de falar com uma pessoa. Use quando cliente mencionar: 'falar com atendente', 'quero falar com humano', 'preciso de ajuda humana', 'transferir para pessoa', 'atendimento pessoal', 'representante', 'operador', reclamações complexas, problemas que a IA não consegue resolver, ou qualquer situação que requeira intervenção humana.",
 				Parameters: map[string]interface{}{
@@ -3048,6 +3126,12 @@ func (s *AIService) executeTool(ctx context.Context, tenantID, customerID uuid.U
 		return s.handleVerCarrinhoWithOptions(tenantID, customerID, true) // Full instructions for view cart
 	case "limparCarrinho":
 		return s.handleLimparCarrinho(tenantID, customerID)
+	case "selecionarFormaPagamento":
+		log.Info().Str("tool_name", "selecionarFormaPagamento").Msg("💳 EXECUTING SELECIONAR FORMA PAGAMENTO FUNCTION")
+		return s.handleSelecionarFormaPagamento(tenantID, customerID, args)
+	case "trocarFormaPagamento":
+		log.Info().Str("tool_name", "trocarFormaPagamento").Msg("💳 EXECUTING TROCAR FORMA PAGAMENTO FUNCTION")
+		return s.handleTrocarFormaPagamento(tenantID, customerID, args)
 	case "checkout":
 		log.Info().Str("tool_name", "checkout").Msg("🎯 EXECUTING CHECKOUT FUNCTION")
 		return s.handleCheckout(tenantID, customerID, customerPhone)

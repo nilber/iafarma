@@ -232,6 +232,24 @@ func (s *CartServiceImpl) UpdateCartItemQuantity(cartID, tenantID, itemID uuid.U
 		Update("quantity", quantity).Error
 }
 
+func (s *CartServiceImpl) UpdateCartPaymentMethod(cartID, tenantID, paymentMethodID uuid.UUID) error {
+	return s.db.Model(&models.Cart{}).
+		Where("id = ? AND tenant_id = ?", cartID, tenantID).
+		Update("payment_method_id", paymentMethodID).Error
+}
+
+func (s *CartServiceImpl) UpdateCartObservations(cartID, tenantID uuid.UUID, observations, changeFor string) error {
+	updates := map[string]interface{}{
+		"observations": observations,
+	}
+	if changeFor != "" {
+		updates["change_for"] = changeFor
+	}
+	return s.db.Model(&models.Cart{}).
+		Where("id = ? AND tenant_id = ?", cartID, tenantID).
+		Updates(updates).Error
+}
+
 type OrderServiceImpl struct {
 	db *gorm.DB
 }
@@ -312,6 +330,17 @@ func (s *OrderServiceImpl) CreateOrderFromCartWithConversation(tenantID, cartID,
 		order.ShippingState = &deliveryAddress.State
 		order.ShippingZipcode = &deliveryAddress.ZipCode
 		order.ShippingCountry = &deliveryAddress.Country
+	}
+
+	// 💳 Copiar dados de pagamento do carrinho para o pedido
+	if cart.PaymentMethodID != nil {
+		order.PaymentMethodID = cart.PaymentMethodID
+	}
+	if cart.Observations != "" {
+		order.Observations = cart.Observations
+	}
+	if cart.ChangeFor != "" {
+		order.ChangeFor = cart.ChangeFor
 	}
 
 	// Iniciar transação para garantir consistência
@@ -399,24 +428,24 @@ func (s *OrderServiceImpl) GetOrdersByCustomer(tenantID, customerID uuid.UUID) (
 }
 
 func (s *OrderServiceImpl) GetPaymentOptions(tenantID uuid.UUID) ([]ai.PaymentOption, error) {
-	// Por enquanto, retornar opções padrão
-	// No futuro, pode vir do banco de dados por tenant
-	options := []ai.PaymentOption{
-		{
-			ID:           "pix",
-			Name:         "PIX",
-			Instructions: "Envie PIX para a chave: vendas@empresa.com",
-		},
-		{
-			ID:           "dinheiro",
-			Name:         "Dinheiro",
-			Instructions: "Pagamento na entrega em dinheiro",
-		},
-		{
-			ID:           "cartao",
-			Name:         "Cartão na Entrega",
-			Instructions: "Pagamento com cartão na entrega",
-		},
+	// Buscar formas de pagamento do banco de dados
+	var paymentMethods []models.PaymentMethod
+	err := s.db.Where("tenant_id = ? AND is_active = ?", tenantID, true).
+		Order("name ASC").
+		Find(&paymentMethods).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Converter para PaymentOption
+	options := make([]ai.PaymentOption, len(paymentMethods))
+	for i, pm := range paymentMethods {
+		options[i] = ai.PaymentOption{
+			ID:           pm.ID.String(),
+			Name:         pm.Name,
+			Instructions: "",
+		}
 	}
 
 	return options, nil

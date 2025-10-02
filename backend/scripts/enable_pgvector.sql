@@ -1,5 +1,5 @@
 -- Script para habilitar a extensão pgvector no PostgreSQL
--- Execute este script no banco de dados zap_vendas_local
+-- Execute este script no banco de dados iafarma_local
 
 -- Criar a extensão pgvector se ela não existir
 CREATE EXTENSION IF NOT EXISTS vector;

@@ -112,16 +112,20 @@ type Inventory struct {
 // Cart represents a shopping cart
 type Cart struct {
 	BaseTenantModel
-	CustomerID   uuid.UUID  `gorm:"type:uuid;not null;constraint:OnDelete:RESTRICT" json:"customer_id"`
-	Status       string     `gorm:"default:'active'" json:"status"` // active, checkout, completed, abandoned
-	ExpiresAt    *time.Time `json:"expires_at"`
-	TotalAmount  string     `gorm:"default:'0'" json:"total_amount"`
-	ItemsCount   int        `gorm:"default:0" json:"items_count"`
-	DiscountCode string     `json:"discount_code"`
+	CustomerID      uuid.UUID  `gorm:"type:uuid;not null;constraint:OnDelete:RESTRICT" json:"customer_id"`
+	PaymentMethodID *uuid.UUID `gorm:"type:uuid;constraint:OnDelete:SET NULL" json:"payment_method_id"` // Forma de pagamento selecionada
+	Status          string     `gorm:"default:'active'" json:"status"`                                  // active, checkout, completed, abandoned
+	ExpiresAt       *time.Time `json:"expires_at"`
+	TotalAmount     string     `gorm:"default:'0'" json:"total_amount"`
+	ItemsCount      int        `gorm:"default:0" json:"items_count"`
+	DiscountCode    string     `json:"discount_code"`
+	Observations    string     `json:"observations"` // Observações do carrinho (ex: precisa de troco, sem cebola, etc)
+	ChangeFor       string     `json:"change_for"`   // Valor para troco quando pagamento em dinheiro
 
 	// Relations
-	Customer *Customer  `gorm:"foreignKey:CustomerID" json:"customer,omitempty"`
-	Items    []CartItem `gorm:"foreignKey:CartID" json:"items,omitempty"`
+	Customer      *Customer      `gorm:"foreignKey:CustomerID" json:"customer,omitempty"`
+	PaymentMethod *PaymentMethod `gorm:"foreignKey:PaymentMethodID" json:"payment_method,omitempty"`
+	Items         []CartItem     `gorm:"foreignKey:CartID" json:"items,omitempty"`
 }
 
 // CartItem represents an item in a cart
@@ -162,6 +166,8 @@ type Order struct {
 	DiscountAmount    string     `gorm:"default:'0'" json:"discount_amount"`
 	Currency          string     `gorm:"default:'BRL'" json:"currency"`
 	Notes             string     `json:"notes"`
+	Observations      string     `json:"observations"` // Campo para observações do cliente (ex: precisa de troco, sem cebola, etc)
+	ChangeFor         string     `json:"change_for"`   // Valor para troco quando pagamento em dinheiro
 	ShippedAt         *time.Time `json:"shipped_at"`
 	DeliveredAt       *time.Time `json:"delivered_at"`
 

@@ -419,6 +419,10 @@ export interface Order {
   shipping_zipcode?: string;
   shipping_country?: string;
   
+  // Payment observations and change
+  observations?: string;
+  change_for?: string;
+  
   // Historical billing address data
   billing_name?: string;
   billing_street?: string;

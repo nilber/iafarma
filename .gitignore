@@ -21,3 +21,4 @@ tmp
 **/.DS_Store
 backend/.air.toml
 backend/.env
+.github
