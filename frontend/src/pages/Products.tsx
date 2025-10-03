@@ -217,10 +217,10 @@ export default function Products() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
-                <DropdownMenuItem onClick={() => setIsImportDialogOpen(true)}>
+                {/* <DropdownMenuItem onClick={() => setIsImportDialogOpen(true)}>
                   <Upload className="w-4 h-4 mr-2" />
                   Importação Rápida (Síncrona)
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
                 <DropdownMenuItem onClick={() => setIsAsyncImportDialogOpen(true)}>
                   <Clock className="w-4 h-4 mr-2" />
                   Importação em Lote (Assíncrona)

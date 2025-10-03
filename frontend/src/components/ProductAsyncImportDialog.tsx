@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Upload, Download, FileText, CheckCircle, XCircle, Clock, AlertCircle } from "lucide-react";
+import * as XLSX from 'xlsx';
 import {
   Dialog,
   DialogContent,
@@ -63,13 +64,164 @@ export function ProductAsyncImportDialog({ open, onOpenChange }: ProductAsyncImp
     }
   }, [progressData?.job?.status, jobId]);
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  /**
+   * Converte arquivo XLSX para CSV no formato esperado pelo backend
+   * Mapeamento de colunas:
+   * - Código de Barras → barcode
+   * - Embalagem → name
+   * - Preço Venda → price
+   * - Preço Oferta → sale_price
+   * - Estoque → stock_quantity
+   */
+  const convertXLSXToCSV = async (file: File): Promise<File> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onload = (e) => {
+        try {
+          const data = new Uint8Array(e.target?.result as ArrayBuffer);
+          const workbook = XLSX.read(data, { type: 'array' });
+          
+          // Pegar a primeira planilha
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          
+          // Converter para array de objetos
+          const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
+          
+          if (jsonData.length < 2) {
+            reject(new Error('Arquivo XLSX vazio ou sem dados'));
+            return;
+          }
+          
+          // Validar colunas esperadas
+          const headers = jsonData[0];
+          const expectedHeaders = ['Código de Barras', 'Embalagem', 'Preço Venda', 'Preço Oferta', 'Estoque'];
+          
+          const hasAllColumns = expectedHeaders.every(expected => 
+            headers.some(header => 
+              typeof header === 'string' && header.trim() === expected
+            )
+          );
+          
+          if (!hasAllColumns) {
+            reject(new Error(
+              'Arquivo XLSX não está no padrão esperado. ' +
+              'Colunas necessárias: Código de Barras, Embalagem, Preço Venda, Preço Oferta, Estoque. ' +
+              'Entre em contato com o suporte para mais detalhes.'
+            ));
+            return;
+          }
+          
+          // Mapear índices das colunas
+          const getColumnIndex = (columnName: string) => {
+            return headers.findIndex(h => 
+              typeof h === 'string' && h.trim() === columnName
+            );
+          };
+          
+          const codigoBarrasIdx = getColumnIndex('Código de Barras');
+          const embalagemIdx = getColumnIndex('Embalagem');
+          const precoVendaIdx = getColumnIndex('Preço Venda');
+          const precoOfertaIdx = getColumnIndex('Preço Oferta');
+          const estoqueIdx = getColumnIndex('Estoque');
+          
+          // Criar CSV no formato esperado
+          const csvHeaders = 'name,description,price,sale_price,sku,barcode,weight,dimensions,brand,tags,stock_quantity,low_stock_threshold,category_name';
+          const csvRows = [csvHeaders];
+          
+          // Processar cada linha de dados (pular header)
+          for (let i = 1; i < jsonData.length; i++) {
+            const row = jsonData[i];
+            
+            // Pular linhas vazias
+            if (!row || row.length === 0 || !row[embalagemIdx]) {
+              continue;
+            }
+            
+            const name = String(row[embalagemIdx] || '').replace(/"/g, '""');
+            const barcode = String(row[codigoBarrasIdx] || '').replace(/"/g, '""');
+            const price = row[precoVendaIdx] || '';
+            const salePrice = row[precoOfertaIdx] || '';
+            const stockQuantity = row[estoqueIdx] || '0';
+            
+            // SKU fica vazio - será gerado automaticamente pelo backend
+            // conforme regra existente de geração de SKU
+            
+            // Criar linha CSV (com campos vazios para description, sku, weight, etc)
+            const csvRow = [
+              `"${name}"`,           // name
+              '',                    // description (vazio)
+              price,                 // price
+              salePrice,            // sale_price
+              '',                    // sku (vazio - backend gera)
+              `"${barcode}"`,       // barcode
+              '',                    // weight (vazio)
+              '',                    // dimensions (vazio)
+              '',                    // brand (vazio)
+              '',                    // tags (vazio)
+              stockQuantity,        // stock_quantity
+              '5',                  // low_stock_threshold (default)
+              ''                     // category_name (vazio)
+            ].join(',');
+            
+            csvRows.push(csvRow);
+          }
+          
+          // Criar novo arquivo CSV
+          const csvContent = csvRows.join('\n');
+          const csvBlob = new Blob([csvContent], { type: 'text/csv' });
+          const csvFile = new File(
+            [csvBlob], 
+            file.name.replace(/\.xlsx$/i, '.csv'),
+            { type: 'text/csv' }
+          );
+          
+          resolve(csvFile);
+        } catch (error) {
+          reject(new Error(`Erro ao processar arquivo XLSX: ${error instanceof Error ? error.message : 'Erro desconhecido'}`));
+        }
+      };
+      
+      reader.onerror = () => {
+        reject(new Error('Erro ao ler o arquivo'));
+      };
+      
+      reader.readAsArrayBuffer(file);
+    });
+  };
+
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && (file.type === 'text/csv' || file.name.endsWith('.csv'))) {
+    if (!file) return;
+    
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+    
+    // Se for XLSX, converter para CSV
+    if (fileExtension === 'xlsx' || fileExtension === 'xls') {
+      try {
+        toast.loading('Convertendo arquivo XLSX para CSV...');
+        const csvFile = await convertXLSXToCSV(file);
+        setSelectedFile(csvFile);
+        setJobId(null);
+        toast.dismiss();
+        toast.success(`Arquivo convertido com sucesso! ${csvFile.name}`);
+      } catch (error) {
+        toast.dismiss();
+        toast.error(error instanceof Error ? error.message : 'Erro ao converter arquivo XLSX');
+        // Limpar o input
+        event.target.value = '';
+      }
+    }
+    // Se for CSV, aceitar diretamente
+    else if (file.type === 'text/csv' || fileExtension === 'csv') {
       setSelectedFile(file);
-      setJobId(null); // Reset job if file changes
-    } else {
-      toast.error('Por favor, selecione um arquivo CSV válido');
+      setJobId(null);
+    }
+    // Arquivo inválido
+    else {
+      toast.error('Por favor, selecione um arquivo CSV ou XLSX válido');
+      event.target.value = '';
     }
   };
 
@@ -158,7 +310,7 @@ export function ProductAsyncImportDialog({ open, onOpenChange }: ProductAsyncImp
         <DialogHeader>
           <DialogTitle>Importar Produtos (Assíncrono)</DialogTitle>
           <DialogDescription>
-            Importe produtos em massa através de um arquivo CSV. O processo é executado em segundo plano.
+            Importe produtos em massa através de um arquivo CSV ou XLSX. O processo é executado em segundo plano.
           </DialogDescription>
         </DialogHeader>
 
@@ -191,11 +343,11 @@ export function ProductAsyncImportDialog({ open, onOpenChange }: ProductAsyncImp
           {!jobId && (
             <>
               <div className="space-y-2">
-                <Label htmlFor="csv-file">Arquivo CSV</Label>
+                <Label htmlFor="csv-file">Arquivo CSV ou XLSX</Label>
                 <Input
                   id="csv-file"
                   type="file"
-                  accept=".csv"
+                  accept=".csv,.xlsx,.xls"
                   onChange={handleFileSelect}
                   disabled={isJobInProgress || isStarting}
                 />

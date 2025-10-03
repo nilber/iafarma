@@ -1,7 +1,11 @@
 package repo
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"iafarma/pkg/models"
+	"regexp"
+	"strings"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -49,7 +53,58 @@ func (r *ProductRepository) Update(product *models.Product) error {
 	return r.db.Omit("embedding_hash").Save(product).Error
 }
 
-// FindExistingProduct finds a product by unique keys (case insensitive)
+// generateUniqueSKU generates a unique SKU based on product name
+func (r *ProductRepository) generateUniqueSKU(tenantID uuid.UUID, productName string) string {
+	// Clean product name to create a base SKU
+	cleaned := strings.ToUpper(productName)
+	// Remove special characters and keep only letters and numbers
+	reg := regexp.MustCompile(`[^A-Z0-9]`)
+	cleaned = reg.ReplaceAllString(cleaned, "")
+
+	// Limit to first 8 characters
+	if len(cleaned) > 8 {
+		cleaned = cleaned[:8]
+	}
+
+	// If too short, pad with "PROD"
+	if len(cleaned) < 4 {
+		cleaned = "PROD" + cleaned
+	}
+
+	// Try with just the base name first
+	baseSKU := cleaned
+	if !r.skuExists(tenantID, baseSKU) {
+		return baseSKU
+	}
+
+	// If exists, try with random suffix
+	for i := 0; i < 10; i++ {
+		// Generate random 4-character suffix
+		randomBytes := make([]byte, 2)
+		rand.Read(randomBytes)
+		suffix := hex.EncodeToString(randomBytes)
+		suffix = strings.ToUpper(suffix)
+
+		candidate := baseSKU + suffix
+		if !r.skuExists(tenantID, candidate) {
+			return candidate
+		}
+	}
+
+	// Fallback: use UUID-based SKU
+	randomBytes := make([]byte, 4)
+	rand.Read(randomBytes)
+	return "SKU" + strings.ToUpper(hex.EncodeToString(randomBytes))
+}
+
+// skuExists checks if a SKU already exists for the tenant
+func (r *ProductRepository) skuExists(tenantID uuid.UUID, sku string) bool {
+	var count int64
+	r.db.Model(&models.Product{}).Where("tenant_id = ? AND sku = ?", tenantID, sku).Count(&count)
+	return count > 0
+}
+
+// FindExistingProduct finds a product by name, SKU, or barcode for upsert logic
 func (r *ProductRepository) FindExistingProduct(tenantID uuid.UUID, name, sku, barcode string) (*models.Product, error) {
 	var product models.Product
 
@@ -86,6 +141,10 @@ func (r *ProductRepository) UpsertProduct(product *models.Product) (*models.Prod
 
 	if err == gorm.ErrRecordNotFound {
 		// Product doesn't exist, create new one
+		// Generate SKU if empty to avoid unique constraint violation
+		if product.SKU == "" {
+			product.SKU = r.generateUniqueSKU(product.TenantID, product.Name)
+		}
 		err = r.db.Create(product).Error
 		return product, true, err // true = created
 	}
